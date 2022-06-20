@@ -11,7 +11,7 @@ base = {}
 base.profile = 'test'
 
 --- 游戏版本
-base.version = "1.6.43"
+base.version = "1.0.0"
 
 --打开控制台
 if base.profile ~= 'release' then
