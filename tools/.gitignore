@@ -1,0 +1,12 @@
+# Default ignored files
+/.idea/
+*.iml
+jzjh.w3x
+.vscode
+/resources/
+jzjh_slk*
+tools/w3x2lni
+tools/jass2lua-master
+jzjh_*.w3x
+
+/改.txt

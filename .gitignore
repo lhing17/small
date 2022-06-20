@@ -1,0 +1,15 @@
+# IDEA相关文件
+/.idea/
+*.iml
+
+# 地图文件
+small.w3x
+small_*.w3x
+
+# 资源文件
+/resources/
+
+# 工具文件
+tools/w3x2lni
+tools/jass2lua-master
+
