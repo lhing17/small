@@ -38,6 +38,6 @@ runtime.debugger = 4279
 if base.profile == 'release' then
     package.path = package.path .. [[;Poi\]] .. base.version .. [[\?.lua;scripts\?.lua]]
 else
-    package.path = package.path .. ';D:/IdeaProjects/JZJH/jzjh/scripts\\?.lua'
+    package.path = package.path .. ';D:/IdeaProjects/small/small/scripts\\?.lua'
 end
 

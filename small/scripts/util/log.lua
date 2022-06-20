@@ -25,7 +25,7 @@ else
 	log.level = 'debug'
 end
 console.write(log.path)
-log.path = 'F:\\jzjh\\logs\\' .. split(log.path, '\\')[2]
+log.path = 'E:\\small\\logs\\' .. split(log.path, '\\')[2]
 log.debug '日志系统装载完毕,向着星辰大海出击!'
 log.info('当前lua引擎的版本为'..runtime.version)
 

@@ -5,5 +5,5 @@
 ---
 
 return {
-    SCRIPT_PATH = 'D:\\MPQEditor\\jzjh1.6\\juezhan\\jzjh\\'
+    SCRIPT_PATH = 'D:\\IdeaProjects\\small\\small\\'
 }
