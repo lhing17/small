@@ -1,6 +1,7 @@
 // -- 引入其他依赖 --
 
-
+// 刷怪
+#include "systems/Spawn.j"
 
 // 系统放到最后
 #include "systems/UnitAttack.j"
@@ -11,11 +12,12 @@
 
 
 globals
-
+    constant integer PLAYER_COUNT = 5
 endglobals
 
 // 入口函数
 function mapInit takes nothing returns nothing
+    call InitSpawn() // 初始化刷怪系统
 
 	call UnitAttack() // 注册单位攻击事件
 	call UseAbility() // 注册使用技能事件
