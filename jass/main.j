@@ -2,6 +2,7 @@
 
 // 刷怪
 #include "systems/Spawn.j"
+#include "systems/HeroSelection.j"
 
 // 系统放到最后
 #include "systems/UnitAttack.j"
@@ -18,6 +19,7 @@ endglobals
 // 入口函数
 function mapInit takes nothing returns nothing
     call InitSpawn() // 初始化刷怪系统
+	call initHeroSelection() // 初始化英雄选择系统
 
 	call UnitAttack() // 注册单位攻击事件
 	call UseAbility() // 注册使用技能事件

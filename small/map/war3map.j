@@ -1,18 +1,22 @@
 globals
+//globals from YDWEPolledWaitNull:
+constant boolean LIBRARY_YDWEPolledWaitNull=true
+//endglobals from YDWEPolledWaitNull
 //globals from YDWETriggerEvent:
 constant boolean LIBRARY_YDWETriggerEvent=true
 trigger yd_DamageEventTrigger= null
-trigger array YDWETriggerEvent__DamageEventQueue
-integer YDWETriggerEvent__DamageEventNumber= 0
+trigger array YDWETriggerEvent___DamageEventQueue
+integer YDWETriggerEvent___DamageEventNumber= 0
 	
 item bj_lastMovedItemInItemSlot= null
 	
-trigger YDWETriggerEvent__MoveItemEventTrigger= null
-trigger array YDWETriggerEvent__MoveItemEventQueue
-integer YDWETriggerEvent__MoveItemEventNumber= 0
+trigger YDWETriggerEvent___MoveItemEventTrigger= null
+trigger array YDWETriggerEvent___MoveItemEventQueue
+integer YDWETriggerEvent___MoveItemEventNumber= 0
 //endglobals from YDWETriggerEvent
     // Generated
 trigger gg_trg_firstOccur= null
+trigger gg_trg_firstOccur_2= null
 integer array attackers
 real array spawnFront1Point
 real array spawnFront2Point
@@ -28,6 +32,13 @@ boolean isSpawnBack= false
 group attackerGroup= CreateGroup()
 constant player ATTACK_PLAYER= Player(6)
 trigger waitSpawnTrigger= CreateTrigger()
+unit array heroList
+group heroGroup
+boolean array hasHero
+unit array hero
+unit array heroInSelection
+string array heroDescription
+real array heroBornPoint
 constant integer PLAYER_COUNT= 5
 
 
@@ -36,6 +47,31 @@ constant integer PLAYER_COUNT= 5
 endglobals
 
 
+//library YDWEPolledWaitNull:
+function YDWEPolledWaitNull takes real duration returns nothing
+    local timer t
+    local real timeRemaining
+    if ( duration > 0 ) then
+        set t=CreateTimer()
+        call TimerStart(t, duration, false, null)
+        loop
+            set timeRemaining=TimerGetRemaining(t)
+            exitwhen timeRemaining <= 0
+            // If we have a bit of time left, skip past 10% of the remaining
+            // duration instead of checking every interval, to minimize the
+            // polling on long waits.
+            if ( timeRemaining > bj_POLLED_WAIT_SKIP_THRESHOLD ) then
+                call TriggerSleepAction(0.1 * timeRemaining)
+            else
+                call TriggerSleepAction(bj_POLLED_WAIT_INTERVAL)
+            endif
+        endloop
+        call DestroyTimer(t)
+    endif
+    set t=null
+endfunction
+
+//library YDWEPolledWaitNull ends
 //library YDWETriggerEvent:
 	
 //===========================================================================  
@@ -45,9 +81,9 @@ function YDWEAnyUnitDamagedTriggerAction takes nothing returns nothing
     local integer i= 0
     
     loop
-        exitwhen i >= YDWETriggerEvent__DamageEventNumber
-        if YDWETriggerEvent__DamageEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent__DamageEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent__DamageEventQueue[i]) then
-            call TriggerExecute(YDWETriggerEvent__DamageEventQueue[i])
+        exitwhen i >= YDWETriggerEvent___DamageEventNumber
+        if YDWETriggerEvent___DamageEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent___DamageEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent___DamageEventQueue[i]) then
+            call TriggerExecute(YDWETriggerEvent___DamageEventQueue[i])
         endif
         set i=i + 1
     endloop
@@ -76,14 +112,14 @@ function YDWESyStemAnyUnitDamagedRegistTrigger takes trigger trg returns nothing
         return
     endif
         
-    if YDWETriggerEvent__DamageEventNumber == 0 then
+    if YDWETriggerEvent___DamageEventNumber == 0 then
         set yd_DamageEventTrigger=CreateTrigger()
         call TriggerAddAction(yd_DamageEventTrigger, function YDWEAnyUnitDamagedTriggerAction)
         call YDWEAnyUnitDamagedEnumUnit()
     endif
     
-    set YDWETriggerEvent__DamageEventQueue[YDWETriggerEvent__DamageEventNumber]=trg
-    set YDWETriggerEvent__DamageEventNumber=YDWETriggerEvent__DamageEventNumber + 1
+    set YDWETriggerEvent___DamageEventQueue[YDWETriggerEvent___DamageEventNumber]=trg
+    set YDWETriggerEvent___DamageEventNumber=YDWETriggerEvent___DamageEventNumber + 1
 endfunction
 //===========================================================================  
 //�ƶ���Ʒ�¼� 
@@ -94,9 +130,9 @@ function YDWESyStemItemUnmovableTriggerAction takes nothing returns nothing
     if GetIssuedOrderId() >= 852002 and GetIssuedOrderId() <= 852007 then
 		set bj_lastMovedItemInItemSlot=GetOrderTargetItem()
     	loop
-        	exitwhen i >= YDWETriggerEvent__MoveItemEventNumber
-        	if YDWETriggerEvent__MoveItemEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent__MoveItemEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent__MoveItemEventQueue[i]) then
-        	    call TriggerExecute(YDWETriggerEvent__MoveItemEventQueue[i])
+        	exitwhen i >= YDWETriggerEvent___MoveItemEventNumber
+        	if YDWETriggerEvent___MoveItemEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent___MoveItemEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent___MoveItemEventQueue[i]) then
+        	    call TriggerExecute(YDWETriggerEvent___MoveItemEventQueue[i])
         	endif
         	set i=i + 1
     	endloop
@@ -107,14 +143,14 @@ function YDWESyStemItemUnmovableRegistTrigger takes trigger trg returns nothing
         return
     endif
         
-    if YDWETriggerEvent__MoveItemEventNumber == 0 then
-        set YDWETriggerEvent__MoveItemEventTrigger=CreateTrigger()
-        call TriggerAddAction(YDWETriggerEvent__MoveItemEventTrigger, function YDWESyStemItemUnmovableTriggerAction)
-        call TriggerRegisterAnyUnitEventBJ(YDWETriggerEvent__MoveItemEventTrigger, EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER)
+    if YDWETriggerEvent___MoveItemEventNumber == 0 then
+        set YDWETriggerEvent___MoveItemEventTrigger=CreateTrigger()
+        call TriggerAddAction(YDWETriggerEvent___MoveItemEventTrigger, function YDWESyStemItemUnmovableTriggerAction)
+        call TriggerRegisterAnyUnitEventBJ(YDWETriggerEvent___MoveItemEventTrigger, EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER)
     endif
     
-    set YDWETriggerEvent__MoveItemEventQueue[YDWETriggerEvent__MoveItemEventNumber]=trg
-    set YDWETriggerEvent__MoveItemEventNumber=YDWETriggerEvent__MoveItemEventNumber + 1
+    set YDWETriggerEvent___MoveItemEventQueue[YDWETriggerEvent___MoveItemEventNumber]=trg
+    set YDWETriggerEvent___MoveItemEventNumber=YDWETriggerEvent___MoveItemEventNumber + 1
 endfunction
 function GetLastMovedItemInItemSlot takes nothing returns item
     return bj_lastMovedItemInItemSlot
@@ -127,7 +163,7 @@ endfunction
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Wed Jul 27 11:36:37 2022
+//   Date: Wed Jul 27 14:42:01 2022
 //   Map Author: zei_kale
 // 
 //===========================================================================
@@ -231,6 +267,89 @@ function InitSpawn takes nothing returns nothing
     set spawnWaitDialog=CreateTimerDialogBJ(tm, "邪教进攻倒计时")
     call TriggerAddAction(waitSpawnTrigger, function waitSpawn)
     set tm=null
+endfunction
+function canSelectHero takes nothing returns boolean
+    return IsUnitInGroup(GetTriggerUnit(), heroGroup) and hasHero[1 + GetPlayerId(GetTriggerPlayer())]
+endfunction
+// 播放攻击动画
+function playAttackAnimation takes unit u returns nothing
+	call SetUnitAnimation(u, "attack")
+	call YDWEPolledWaitNull(2)
+	call ResetUnitAnimation(u)
+endfunction
+function selectHero takes nothing returns nothing
+    local player p= GetTriggerPlayer()
+ local integer i= 1 + GetPlayerId(p)
+ local unit u= GetTriggerUnit()
+    local integer j= 1
+    if heroInSelection[i] == null or GetUnitTypeId(heroInSelection[i]) != GetUnitTypeId(u) then
+        // 单击查看英雄描述
+        set heroInSelection[i]=u
+        loop
+            exitwhen j > 7
+            if u == heroList[j] then
+                call DisplayTimedTextToPlayer(p, 0, 0, 15., heroDescription[j])
+			    call playAttackAnimation(u)
+                return
+            endif
+            set j=j + 1
+        endloop
+    else
+        // 双击选取英雄
+        set hero[i]=CreateUnit(p, GetUnitTypeId(u), heroBornPoint[1], heroBornPoint[2], 270)
+        call SelectUnitRemoveForPlayer(u, p)
+        call SelectUnitAddForPlayer(hero[i], p)
+        call DestroyEffect(AddSpecialEffectTargetUnitBJ("overhead", hero[i], "Abilities\\Spells\\Other\\Awaken\\Awaken.mdl"))
+        set hasHero[i]=true
+        // TODO 其他选择英雄时的处理
+    endif
+    set p=null
+    set u=null
+endfunction
+// 初始化英雄选择
+function initHeroSelection takes nothing returns nothing
+    local trigger t= CreateTrigger()
+    local integer j= 1
+    set heroList[1]=null // gg_unit_hero_1
+set heroList[2]=null // gg_unit_hero_2
+set heroList[3]=null // gg_unit_hero_3
+set heroList[4]=null // gg_unit_hero_4
+set heroList[5]=null // gg_unit_hero_5
+set heroList[6]=null // gg_unit_hero_6
+set heroList[7]=null // gg_unit_hero_7
+
+    set heroDescription[1]="英雄1描述"
+    set heroDescription[2]="英雄2描述"
+    set heroDescription[3]="英雄3描述"
+    set heroDescription[4]="英雄4描述"
+    set heroDescription[5]="英雄5描述"
+    set heroDescription[6]="英雄6描述"
+    set heroDescription[7]="英雄7描述"
+    set heroBornPoint[1]=0.0
+    set heroBornPoint[2]=0.0
+    set j=1
+    loop
+        exitwhen j > PLAYER_COUNT
+        set hasHero[j]=false
+        set hero[j]=null
+        set heroInSelection[j]=null
+        set j=j + 1
+    endloop
+    set heroGroup=CreateGroup()
+    loop
+        exitwhen j > 7
+        call GroupAddUnit(heroGroup, heroList[j])
+        set j=j + 1
+    endloop
+    set j=1
+    loop
+        exitwhen j > PLAYER_COUNT
+        call TriggerRegisterPlayerSelectionEventBJ(t, Player(j - 1), true)
+        set j=j + 1
+    endloop
+	call TriggerAddCondition(t, Condition(function canSelectHero))
+	call TriggerAddAction(t, function selectHero)
+    set t=null
 endfunction
 // 系统放到最后
 // 单位受到攻击
@@ -360,6 +479,7 @@ endfunction
 // 入口函数
 function mapInit takes nothing returns nothing
     call InitSpawn() // 初始化刷怪系统
+call initHeroSelection() // 初始化英雄选择系统
 
 	call UnitAttack() // 注册单位攻击事件
 call UseAbility() // 注册使用技能事件
@@ -384,8 +504,20 @@ function InitTrig_firstOccur takes nothing returns nothing
     call TriggerAddAction(gg_trg_firstOccur, function Trig_firstOccurActions)
 endfunction
 //===========================================================================
+// Trigger: firstOccur-2
+//===========================================================================
+function Trig_firstOccur_2Actions takes nothing returns nothing
+    call YDWEPolledWaitNull(2)
+endfunction
+//===========================================================================
+function InitTrig_firstOccur_2 takes nothing returns nothing
+    set gg_trg_firstOccur_2=CreateTrigger()
+    call TriggerAddAction(gg_trg_firstOccur_2, function Trig_firstOccur_2Actions)
+endfunction
+//===========================================================================
 function InitCustomTriggers takes nothing returns nothing
     call InitTrig_firstOccur()
+    call InitTrig_firstOccur_2()
 endfunction
 //***************************************************************************
 //*
@@ -574,7 +706,7 @@ function main takes nothing returns nothing
 
 
     call InitGlobals()
-    call InitTrig_firstOccur() // INLINED!!
+    call InitCustomTriggers()
 endfunction
 //***************************************************************************
 //*
