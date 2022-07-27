@@ -58,7 +58,7 @@ function joinDenom takes unit u, item it returns nothing
 			// set gengu[i] = (gengu[i] + 3)
 			// set jingmai[i] = (jingmai[i] + 2)
 			// call RemoveLocation(Q4)
-			// call UnitAddItemByIdSwapped(1227896394, u)
+            call UnitAddItemById(u, 'I100')
         endif
         set j = j + 1
     endloop
