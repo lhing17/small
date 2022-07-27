@@ -1,6 +1,6 @@
 /*
- * 刷怪系统
- */
+* 刷怪系统
+*/
 
 globals
     integer array attackers
@@ -17,10 +17,11 @@ globals
     boolean isSpawnBack = false // 是否刷后面的怪
     group attackerGroup = CreateGroup() // 进攻怪物组
     constant player ATTACK_PLAYER = Player(6) // 进攻玩家
+    trigger waitSpawnTrigger = CreateTrigger() // 等待刷怪触发器
 endglobals
 
 // 执行刷怪系统
-function doSpawn takes nothing returns nothing
+function doSpawnPeriodically takes nothing returns nothing
     local unit u = null
     if isSpawning then
         set u = CreateUnit(ATTACK_PLAYER, attackers[wave], spawnFront1Point[1], spawnFront1Point[2], 270)
@@ -39,25 +40,46 @@ function doSpawn takes nothing returns nothing
             set u = CreateUnit(ATTACK_PLAYER, attackers[wave], spawnBackPoint[1], spawnBackPoint[2], 270)
             call IssuePointOrderById(u, 0xD000F, basePoint[1], basePoint[2])
             call GroupAddUnit(attackerGroup, u)
-        end
-    end
+        endif
+    endif
     set u = null
+endfunction
+
+function executeWaitSpawn takes nothing returns nothing
+    call DestroyTimer(GetExpiredTimer())
+    call TriggerExecute(waitSpawnTrigger)
+endfunction
+
+function nextSpawn takes nothing returns nothing
+    local timer t = CreateTimer()
+    set wave = wave + 1
+
+    call DestroyTimerDialog(spawnWaitDialog)
+    set isSpawning = true
+    call TimerStart(t, 150, false, function executeWaitSpawn)
+    set t = null
 endfunction
 
 function waitSpawn takes nothing returns nothing
     set isSpawning = false
-    // TODO
-
+    // 等待下一次进攻
+    call TimerStart(spawnWaitTimer, 90, false, function nextSpawn)
+    set spawnWaitDialog = CreateTimerDialogBJ(spawnWaitTimer, "邪教下次进攻：")
 endfunction
 
 function firstSpawn takes nothing returns nothing
+    local timer t = CreateTimer()
     call DestroyTimerDialog(spawnWaitDialog)
+    set wave = 1
     call DisplayTextToForce(bj_FORCE_ALL_PLAYERS, "|cFFDDA0DD西域邪教开始了进攻正派武林，玩家务必要确保正派武林不被摧毁，否则游戏失败|r")
     set isSpawning = true
+    call TimerStart(t, 150, false, function executeWaitSpawn)
+    set t = null
 endfunction
 
 function InitSpawn takes nothing returns nothing
-    local timer t = CreateTimer()
+    local timer tm = CreateTimer()
+
 
     // 暂定15波进攻怪
     set attackers[1] = 'e000'
@@ -92,10 +114,13 @@ function InitSpawn takes nothing returns nothing
     set basePoint[1] = 0.0
     set basePoint[2] = 0.0
 
-    call TimerStart(spawnTimer, 3, true, function doSpawn)
+    call TimerStart(spawnTimer, 3, true, function doSpawnPeriodically)
 
     // 第一次刷怪
-    call TimerStart(t, 120, false, function firstSpawn)
-    set spawnWaitDialog = CreateTimerDialogBJ(t, "邪教进攻倒计时")
-    set t = null
+    call TimerStart(tm, 120, false, function firstSpawn)
+    set spawnWaitDialog = CreateTimerDialogBJ(tm, "邪教进攻倒计时")
+
+    call TriggerAddAction(waitSpawnTrigger, function waitSpawn)
+
+    set tm = null
 endfunction
