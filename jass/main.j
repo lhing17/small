@@ -29,6 +29,8 @@ globals
 	integer array medical
 
 	hashtable YDHT = InitHashtable()
+
+	constant integer LING_BO_WEI_BU = 'A000'
 endglobals
 
 
