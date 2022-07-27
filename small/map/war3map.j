@@ -1,4 +1,34 @@
 globals
+//globals from YDWETriggerEvent:
+constant boolean LIBRARY_YDWETriggerEvent=true
+trigger yd_DamageEventTrigger= null
+trigger array YDWETriggerEvent__DamageEventQueue
+integer YDWETriggerEvent__DamageEventNumber= 0
+	
+item bj_lastMovedItemInItemSlot= null
+	
+trigger YDWETriggerEvent__MoveItemEventTrigger= null
+trigger array YDWETriggerEvent__MoveItemEventQueue
+integer YDWETriggerEvent__MoveItemEventNumber= 0
+//endglobals from YDWETriggerEvent
+    // Generated
+trigger gg_trg_firstOccur= null
+integer array attackers
+real array spawnFront1Point
+real array spawnFront2Point
+real array spawnFront3Point
+real array spawnBackPoint
+real array basePoint
+integer wave= 0
+timer spawnTimer= CreateTimer()
+timer spawnWaitTimer= CreateTimer()
+timerdialog spawnWaitDialog
+boolean isSpawning= false
+boolean isSpawnBack= false
+group attackerGroup= CreateGroup()
+constant player ATTACK_PLAYER= Player(6)
+trigger waitSpawnTrigger= CreateTrigger()
+constant integer PLAYER_COUNT= 5
 
 
 //JASSHelper struct globals:
@@ -6,13 +36,98 @@ globals
 endglobals
 
 
+//library YDWETriggerEvent:
+	
+//===========================================================================  
+//���ⵥλ�˺��¼� 
+//===========================================================================
+function YDWEAnyUnitDamagedTriggerAction takes nothing returns nothing
+    local integer i= 0
+    
+    loop
+        exitwhen i >= YDWETriggerEvent__DamageEventNumber
+        if YDWETriggerEvent__DamageEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent__DamageEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent__DamageEventQueue[i]) then
+            call TriggerExecute(YDWETriggerEvent__DamageEventQueue[i])
+        endif
+        set i=i + 1
+    endloop
+endfunction
+function YDWEAnyUnitDamagedFilter takes nothing returns boolean
+    if GetUnitAbilityLevel(GetFilterUnit(), 'Aloc') <= 0 then
+        call TriggerRegisterUnitEvent(yd_DamageEventTrigger, GetFilterUnit(), EVENT_UNIT_DAMAGED)
+    endif
+    return false
+endfunction
+function YDWEAnyUnitDamagedEnumUnit takes nothing returns nothing
+    local trigger t= CreateTrigger()
+    local region r= CreateRegion()
+    local group g= CreateGroup()
+    call RegionAddRect(r, GetWorldBounds())
+    call TriggerRegisterEnterRegion(t, r, Condition(function YDWEAnyUnitDamagedFilter))
+    call GroupEnumUnitsInRect(g, GetWorldBounds(), Condition(function YDWEAnyUnitDamagedFilter))
+    call DestroyGroup(g)
+    set r=null
+    set t=null
+    set g=null
+endfunction
+	
+function YDWESyStemAnyUnitDamagedRegistTrigger takes trigger trg returns nothing
+    if trg == null then
+        return
+    endif
+        
+    if YDWETriggerEvent__DamageEventNumber == 0 then
+        set yd_DamageEventTrigger=CreateTrigger()
+        call TriggerAddAction(yd_DamageEventTrigger, function YDWEAnyUnitDamagedTriggerAction)
+        call YDWEAnyUnitDamagedEnumUnit()
+    endif
+    
+    set YDWETriggerEvent__DamageEventQueue[YDWETriggerEvent__DamageEventNumber]=trg
+    set YDWETriggerEvent__DamageEventNumber=YDWETriggerEvent__DamageEventNumber + 1
+endfunction
+//===========================================================================  
+//�ƶ���Ʒ�¼� 
+//===========================================================================  
+function YDWESyStemItemUnmovableTriggerAction takes nothing returns nothing
+    local integer i= 0
+    
+    if GetIssuedOrderId() >= 852002 and GetIssuedOrderId() <= 852007 then
+		set bj_lastMovedItemInItemSlot=GetOrderTargetItem()
+    	loop
+        	exitwhen i >= YDWETriggerEvent__MoveItemEventNumber
+        	if YDWETriggerEvent__MoveItemEventQueue[i] != null and IsTriggerEnabled(YDWETriggerEvent__MoveItemEventQueue[i]) and TriggerEvaluate(YDWETriggerEvent__MoveItemEventQueue[i]) then
+        	    call TriggerExecute(YDWETriggerEvent__MoveItemEventQueue[i])
+        	endif
+        	set i=i + 1
+    	endloop
+	endif
+endfunction
+function YDWESyStemItemUnmovableRegistTrigger takes trigger trg returns nothing
+    if trg == null then
+        return
+    endif
+        
+    if YDWETriggerEvent__MoveItemEventNumber == 0 then
+        set YDWETriggerEvent__MoveItemEventTrigger=CreateTrigger()
+        call TriggerAddAction(YDWETriggerEvent__MoveItemEventTrigger, function YDWESyStemItemUnmovableTriggerAction)
+        call TriggerRegisterAnyUnitEventBJ(YDWETriggerEvent__MoveItemEventTrigger, EVENT_PLAYER_UNIT_ISSUED_TARGET_ORDER)
+    endif
+    
+    set YDWETriggerEvent__MoveItemEventQueue[YDWETriggerEvent__MoveItemEventNumber]=trg
+    set YDWETriggerEvent__MoveItemEventNumber=YDWETriggerEvent__MoveItemEventNumber + 1
+endfunction
+function GetLastMovedItemInItemSlot takes nothing returns item
+    return bj_lastMovedItemInItemSlot
+endfunction
+
+//library YDWETriggerEvent ends
 //===========================================================================
 // 
 // 小人物的江湖
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Mon Jun 20 10:59:38 2022
+//   Date: Wed Jul 27 11:36:37 2022
 //   Map Author: zei_kale
 // 
 //===========================================================================
@@ -22,6 +137,255 @@ endglobals
 //*
 //***************************************************************************
 function InitGlobals takes nothing returns nothing
+endfunction
+//***************************************************************************
+//*
+//*  Custom Script Code
+//*
+//***************************************************************************
+//TESH.scrollpos=0
+//TESH.alwaysfold=0
+// -- 引入其他依赖 --
+// 刷怪
+
+// 执行刷怪系统
+function doSpawnPeriodically takes nothing returns nothing
+    local unit u= null
+    if isSpawning then
+        set u=CreateUnit(ATTACK_PLAYER, attackers[wave], spawnFront1Point[1], spawnFront1Point[2], 270)
+        call IssuePointOrderById(u, 0xD000F, basePoint[1], basePoint[2])
+        call GroupAddUnit(attackerGroup, u)
+        set u=CreateUnit(ATTACK_PLAYER, attackers[wave], spawnFront2Point[1], spawnFront2Point[2], 270)
+        call IssuePointOrderById(u, 0xD000F, basePoint[1], basePoint[2])
+        call GroupAddUnit(attackerGroup, u)
+        set u=CreateUnit(ATTACK_PLAYER, attackers[wave], spawnFront3Point[1], spawnFront3Point[2], 270)
+        call IssuePointOrderById(u, 0xD000F, basePoint[1], basePoint[2])
+        call GroupAddUnit(attackerGroup, u)
+        if isSpawnBack then
+            set u=CreateUnit(ATTACK_PLAYER, attackers[wave], spawnBackPoint[1], spawnBackPoint[2], 270)
+            call IssuePointOrderById(u, 0xD000F, basePoint[1], basePoint[2])
+            call GroupAddUnit(attackerGroup, u)
+        endif
+    endif
+    set u=null
+endfunction
+function executeWaitSpawn takes nothing returns nothing
+    call DestroyTimer(GetExpiredTimer())
+    call TriggerExecute(waitSpawnTrigger)
+endfunction
+function nextSpawn takes nothing returns nothing
+    local timer t= CreateTimer()
+    set wave=wave + 1
+    call DestroyTimerDialog(spawnWaitDialog)
+    set isSpawning=true
+    call TimerStart(t, 150, false, function executeWaitSpawn)
+    set t=null
+endfunction
+function waitSpawn takes nothing returns nothing
+    set isSpawning=false
+    // 等待下一次进攻
+    call TimerStart(spawnWaitTimer, 90, false, function nextSpawn)
+    set spawnWaitDialog=CreateTimerDialogBJ(spawnWaitTimer, "邪教下次进攻：")
+endfunction
+function firstSpawn takes nothing returns nothing
+    local timer t= CreateTimer()
+    call DestroyTimerDialog(spawnWaitDialog)
+    set wave=1
+    call DisplayTextToForce(bj_FORCE_ALL_PLAYERS, "|cFFDDA0DD西域邪教开始了进攻正派武林，玩家务必要确保正派武林不被摧毁，否则游戏失败|r")
+    set isSpawning=true
+    call TimerStart(t, 150, false, function executeWaitSpawn)
+    set t=null
+endfunction
+function InitSpawn takes nothing returns nothing
+    local timer tm= CreateTimer()
+    // 暂定15波进攻怪
+    set attackers[1]='e000'
+    set attackers[2]='e001'
+    set attackers[3]='e002'
+    set attackers[4]='e003'
+    set attackers[5]='e004'
+    set attackers[6]='e005'
+    set attackers[7]='e006'
+    set attackers[8]='e007'
+    set attackers[9]='e008'
+    set attackers[10]='e009'
+    set attackers[11]='e010'
+    set attackers[12]='e011'
+    set attackers[13]='e012'
+    set attackers[14]='e013'
+    set attackers[15]='e014'
+    // 初始化出怪点
+    set spawnFront1Point[1]=0.0
+    set spawnFront1Point[2]=0.0
+    set spawnFront2Point[1]=0.0
+    set spawnFront2Point[2]=0.0
+    set spawnFront3Point[1]=0.0
+    set spawnFront3Point[2]=0.0
+    set spawnBackPoint[1]=0.0
+    set spawnBackPoint[2]=0.0
+    set basePoint[1]=0.0
+    set basePoint[2]=0.0
+    call TimerStart(spawnTimer, 3, true, function doSpawnPeriodically)
+    // 第一次刷怪
+    call TimerStart(tm, 120, false, function firstSpawn)
+    set spawnWaitDialog=CreateTimerDialogBJ(tm, "邪教进攻倒计时")
+    call TriggerAddAction(waitSpawnTrigger, function waitSpawn)
+    set tm=null
+endfunction
+// 系统放到最后
+// 单位受到攻击
+function UnitAttack_Conditions takes nothing returns boolean
+ local unit u= GetAttacker()
+ local unit ut= GetTriggerUnit()
+ local player p= GetOwningPlayer(u)
+ local integer i= 1 + GetPlayerId(p)
+	set u=null
+	set ut=null
+	set p=null
+	return false
+endfunction
+function UnitAttack takes nothing returns nothing
+ local trigger t= CreateTrigger()
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_ATTACKED)
+	call TriggerAddCondition(t, Condition(function UnitAttack_Conditions))
+	set t=null
+endfunction
+//使用技能系统
+function UseAbility_Conditions takes nothing returns boolean
+ local integer id= GetSpellAbilityId()
+ local unit u= GetTriggerUnit()
+ local unit ut= GetSpellTargetUnit()
+ local player p= GetOwningPlayer(u)
+ local integer i= GetPlayerId(p)
+ 
+	set u=null
+	set ut=null
+	set p=null
+	return false
+endfunction
+//单位使用技能系统
+function UseAbility takes nothing returns nothing
+ local trigger t= CreateTrigger()
+	
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_SPELL_EFFECT)
+	call TriggerAddCondition(t, Condition(function UseAbility_Conditions))
+	set t=null
+endfunction
+function UnitDamage_Conditions takes nothing returns boolean
+ local unit u= GetEventDamageSource()
+ local unit ut= GetTriggerUnit()
+ local player p= GetOwningPlayer(u)
+ local integer i= 1 + GetPlayerId(p)
+ local real damage= GetEventDamage()
+	
+	set u=null
+	set ut=null
+	set p=null
+	return false
+endfunction
+//任意单位伤害事件系统
+function UnitDamage takes nothing returns nothing
+ local trigger t= CreateTrigger()
+	
+	call YDWESyStemAnyUnitDamagedRegistTrigger(t)
+	call TriggerAddCondition(t, Condition(function UnitDamage_Conditions))
+	set t=null
+endfunction
+// 任意单位死亡事件
+function UnitDeath_Conditions takes nothing returns boolean
+ local unit u= GetKillingUnit()
+ local unit ut= GetTriggerUnit()
+ local integer i= 1 + GetPlayerId(GetOwningPlayer(u))
+	
+	set u=null
+	set ut=null
+	return false
+endfunction
+//任意单位死亡事件系统
+function UnitDeath takes nothing returns nothing
+ local trigger t= CreateTrigger()
+	
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_DEATH)
+	call TriggerAddCondition(t, Condition(function UnitDeath_Conditions))
+	set t=null
+endfunction
+// 购买物品
+function BuyItem_Conditions takes nothing returns boolean
+ local unit u= GetBuyingUnit()
+ local unit ut= GetSellingUnit()
+ local item it= GetSoldItem()
+ local integer i= 1 + GetPlayerId(GetOwningPlayer(u))
+	
+	set it=null
+	set u=null
+	set ut=null
+	return false
+endfunction
+// 使用物品
+function UseItem_Conditions takes nothing returns boolean
+ local unit u= GetTriggerUnit()
+ local item it= GetManipulatedItem()
+ local integer i= 1 + GetPlayerId(GetOwningPlayer(u))
+ local integer id= 0
+	
+	
+	set u=null
+	set it=null
+	return false
+endfunction
+// 捡起物品
+function PickupItem_Conditions takes nothing returns boolean
+ local unit u= GetTriggerUnit()
+ local item it= GetManipulatedItem()
+ local integer i= 1 + GetPlayerId(GetOwningPlayer(u))
+	
+	set u=null
+	set it=null
+	return false
+endfunction
+//任意单位购买物品系统
+function ItemEvent takes nothing returns nothing
+ local trigger t= CreateTrigger()
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_SELL_ITEM)
+	call TriggerAddCondition(t, Condition(function BuyItem_Conditions))
+	
+	set t=CreateTrigger()
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_USE_ITEM)
+	call TriggerAddCondition(t, Condition(function UseItem_Conditions))
+	set t=CreateTrigger()
+	call TriggerRegisterAnyUnitEventBJ(t, EVENT_PLAYER_UNIT_PICKUP_ITEM)
+	call TriggerAddCondition(t, Condition(function PickupItem_Conditions))
+	set t=null
+endfunction
+// 入口函数
+function mapInit takes nothing returns nothing
+    call InitSpawn() // 初始化刷怪系统
+
+	call UnitAttack() // 注册单位攻击事件
+call UseAbility() // 注册使用技能事件
+call UnitDamage() // 注册任意单位伤害事件
+call UnitDeath() // 注册任意单位死亡事件
+call ItemEvent() // 注册物品相关事件
+endfunction
+//***************************************************************************
+//*
+//*  Triggers
+//*
+//***************************************************************************
+//===========================================================================
+// Trigger: firstOccur
+//===========================================================================
+function Trig_firstOccurActions takes nothing returns nothing
+endfunction
+//===========================================================================
+function InitTrig_firstOccur takes nothing returns nothing
+    set gg_trg_firstOccur=CreateTrigger()
+    call YDWESyStemAnyUnitDamagedRegistTrigger(gg_trg_firstOccur)
+    call TriggerAddAction(gg_trg_firstOccur, function Trig_firstOccurActions)
+endfunction
+//===========================================================================
+function InitCustomTriggers takes nothing returns nothing
+    call InitTrig_firstOccur()
 endfunction
 //***************************************************************************
 //*
@@ -79,7 +443,7 @@ function InitCustomPlayerSlots takes nothing returns nothing
     call SetPlayerController(Player(7), MAP_CONTROL_COMPUTER)
 endfunction
 function InitCustomTeams takes nothing returns nothing
-    // Force: TRIGSTR_002
+    // Force: TRIGSTR_009
     call SetPlayerTeam(Player(0), 0)
     call SetPlayerState(Player(0), PLAYER_STATE_ALLIED_VICTORY, 1)
     call SetPlayerTeam(Player(1), 0)
@@ -154,7 +518,7 @@ function InitCustomTeams takes nothing returns nothing
     call SetPlayerAllianceStateVisionBJ(Player(5), Player(2), true)
     call SetPlayerAllianceStateVisionBJ(Player(5), Player(3), true)
     call SetPlayerAllianceStateVisionBJ(Player(5), Player(4), true)
-    // Force: TRIGSTR_046
+    // Force: TRIGSTR_010
     call SetPlayerTeam(Player(6), 1)
     call SetPlayerState(Player(6), PLAYER_STATE_ALLIED_VICTORY, 1)
     call SetPlayerTeam(Player(7), 1)
@@ -210,6 +574,7 @@ function main takes nothing returns nothing
 
 
     call InitGlobals()
+    call InitTrig_firstOccur() // INLINED!!
 endfunction
 //***************************************************************************
 //*
@@ -235,6 +600,11 @@ function config takes nothing returns nothing
     call InitCustomTeams()
     call InitAllyPriorities()
 endfunction
+//===========================================================================  
+//===========================================================================  
+//�Զ����¼� 
+//===========================================================================
+//===========================================================================   
 
 
 
