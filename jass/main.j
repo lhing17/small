@@ -2,7 +2,12 @@
 
 // 刷怪
 #include "systems/Spawn.j"
+
+// 选择英雄
 #include "systems/HeroSelection.j"
+
+// 选择门派
+#include "logic/DenomSelection.j"
 
 // 系统放到最后
 #include "systems/UnitAttack.j"
@@ -13,13 +18,39 @@
 
 
 globals
-    constant integer PLAYER_COUNT = 5
+	constant integer PLAYER_COUNT = 5
+	// 悟性，决定技能升重的速度
+	integer array intellect
+	// 根骨，决定伤害暴击倍数
+	integer array strength
+	// 福缘，决定掉落物品的概率
+	integer array luck
+	// 医术，决定英雄血和蓝的恢复能力
+	integer array medical
+
+	hashtable YDHT = InitHashtable()
 endglobals
+
+
+function initSelfDefinedGlobals takes nothing returns nothing
+	local integer i = 1
+	loop
+		exitwhen i > PLAYER_COUNT
+		set intellect[i] = 0
+		set strength[i] = 0
+		set luck[i] = 0
+		set medical[i] = 0
+		set i = i + 1
+	endloop
+endfunction
+
 
 // 入口函数
 function mapInit takes nothing returns nothing
-    call InitSpawn() // 初始化刷怪系统
+	call initSelfDefinedGlobals() // 初始化全局变量
+	call InitSpawn() // 初始化刷怪系统
 	call initHeroSelection() // 初始化英雄选择系统
+	call initDenomSelection() // 初始化门派选择
 
 	call UnitAttack() // 注册单位攻击事件
 	call UseAbility() // 注册使用技能事件
