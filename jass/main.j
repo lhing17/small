@@ -1,5 +1,10 @@
 // -- 引入其他依赖 --
 
+// 扩展库
+#include "library/BlizzardAPI.j"
+#include "library/DzAPI.j"
+#include "library/UI.j"
+
 // 刷怪
 #include "systems/Spawn.j"
 
@@ -13,6 +18,7 @@
 #include "systems/GeneralDebuff.j"
 
 // 系统放到最后
+#include "systems/KeyInput.j"
 #include "systems/EverySecond.j"
 #include "systems/UnitAttack.j"
 #include "systems/UseAbility.j"
@@ -56,6 +62,7 @@ function mapInit takes nothing returns nothing
 	call initHeroSelection() // 初始化英雄选择系统
 	call initDenomSelection() // 初始化门派选择
 
+	call keyInputSystem() // 初始化键盘输入系统
 	call everySecond() // 每秒钟调用一次
 	call UnitAttack() // 注册单位攻击事件
 	call UseAbility() // 注册使用技能事件
