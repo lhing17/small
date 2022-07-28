@@ -1,4 +1,7 @@
 globals
+//globals from FrameLibrary:
+constant boolean LIBRARY_FrameLibrary=true
+//endglobals from FrameLibrary
 //globals from YDTriggerSaveLoadSystem:
 constant boolean LIBRARY_YDTriggerSaveLoadSystem=true
 hashtable YDHT
@@ -46,6 +49,8 @@ integer YDWETimerSystem__TimerSystem_RunIndex= 0
     // Generated
 trigger gg_trg_firstOccur= null
 trigger gg_trg_firstOccur_2= null
+constant integer FRAME_ID= - 29734415
+integer GUI
 integer array attackers
 real array spawnFront1Point
 real array spawnFront2Point
@@ -100,6 +105,18 @@ constant integer LING_BO_WEI_BU= 'A000'
 trigger l__library_init
 
 //JASSHelper struct globals:
+constant integer si__Frame=1
+integer si__Frame_F=0
+integer si__Frame_I=0
+integer array si__Frame_V
+hashtable s__Frame_HT= InitHashtable()
+integer s__Frame_num= 0
+integer array s__Frame_id
+boolean array s__Frame_isShow
+boolean array s__Frame_isEnable
+boolean array s__Frame_hover
+trigger st__Frame_onDestroy
+integer f__arg_this
 
 endglobals
 	native EXGetEffectX takes effect e returns real
@@ -115,8 +132,407 @@ endglobals
 	native EXEffectMatScale takes effect e, real x, real y, real z returns nothing
 	native EXEffectMatReset takes effect e returns nothing
 	native EXSetEffectSpeed takes effect e, real speed returns nothing
+native DzGetMouseTerrainX takes nothing returns real
+native DzGetMouseTerrainY takes nothing returns real
+native DzGetMouseTerrainZ takes nothing returns real
+native DzIsMouseOverUI takes nothing returns boolean
+native DzGetMouseX takes nothing returns integer
+native DzGetMouseY takes nothing returns integer
+native DzGetMouseXRelative takes nothing returns integer
+native DzGetMouseYRelative takes nothing returns integer
+native DzSetMousePos takes integer x, integer y returns nothing
+native DzTriggerRegisterMouseEvent takes trigger trig, integer btn, integer status, boolean sync, string func returns nothing
+native DzTriggerRegisterMouseEventByCode takes trigger trig, integer btn, integer status, boolean sync, code funcHandle returns nothing
+native DzTriggerRegisterKeyEvent takes trigger trig, integer key, integer status, boolean sync, string func returns nothing
+native DzTriggerRegisterKeyEventByCode takes trigger trig, integer key, integer status, boolean sync, code funcHandle returns nothing
+native DzTriggerRegisterMouseWheelEvent takes trigger trig, boolean sync, string func returns nothing
+native DzTriggerRegisterMouseWheelEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+native DzTriggerRegisterMouseMoveEvent takes trigger trig, boolean sync, string func returns nothing
+native DzTriggerRegisterMouseMoveEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+native DzGetTriggerKey takes nothing returns integer
+native DzGetWheelDelta takes nothing returns integer
+native DzIsKeyDown takes integer iKey returns boolean
+native DzGetTriggerKeyPlayer takes nothing returns player
+native DzGetWindowWidth takes nothing returns integer
+native DzGetWindowHeight takes nothing returns integer
+native DzGetWindowX takes nothing returns integer
+native DzGetWindowY takes nothing returns integer
+native DzTriggerRegisterWindowResizeEvent takes trigger trig, boolean sync, string func returns nothing
+native DzTriggerRegisterWindowResizeEventByCode takes trigger trig, boolean sync, code funcHandle returns nothing
+native DzIsWindowActive takes nothing returns boolean
+native DzDestructablePosition takes destructable d, real x, real y returns nothing
+native DzSetUnitPosition takes unit whichUnit, real x, real y returns nothing
+native DzExecuteFunc takes string funcName returns nothing
+native DzGetUnitUnderMouse takes nothing returns unit
+native DzSetUnitTexture takes unit whichUnit, string path, integer texId returns nothing
+native DzSetMemory takes integer address, real value returns nothing
+native DzSetUnitID takes unit whichUnit, integer id returns nothing
+native DzSetUnitModel takes unit whichUnit, string path returns nothing
+native DzSetWar3MapMap takes string map returns nothing
+native DzTriggerRegisterSyncData takes trigger trig, string prefix, boolean server returns nothing
+native DzSyncData takes string prefix, string data returns nothing
+native DzGetTriggerSyncData takes nothing returns string
+native DzGetTriggerSyncPlayer takes nothing returns player
+native DzFrameHideInterface takes nothing returns nothing
+native DzFrameEditBlackBorders takes real upperHeight, real bottomHeight returns nothing
+native DzFrameGetPortrait takes nothing returns integer
+native DzFrameGetMinimap takes nothing returns integer
+native DzFrameGetCommandBarButton takes integer row, integer column returns integer
+native DzFrameGetHeroBarButton takes integer buttonId returns integer
+native DzFrameGetHeroHPBar takes integer buttonId returns integer
+native DzFrameGetHeroManaBar takes integer buttonId returns integer
+native DzFrameGetItemBarButton takes integer buttonId returns integer
+native DzFrameGetMinimapButton takes integer buttonId returns integer
+native DzFrameGetUpperButtonBarButton takes integer buttonId returns integer
+native DzFrameGetTooltip takes nothing returns integer 
+native DzFrameGetChatMessage takes nothing returns integer 
+native DzFrameGetUnitMessage takes nothing returns integer 
+native DzFrameGetTopMessage takes nothing returns integer 
+native DzGetColor takes integer r, integer g, integer b, integer a returns integer
+native DzFrameSetUpdateCallback takes string func returns nothing
+native DzFrameSetUpdateCallbackByCode takes code funcHandle returns nothing
+native DzFrameShow takes integer frame, boolean enable returns nothing
+native DzCreateFrame takes string frame, integer parent, integer id returns integer
+native DzCreateSimpleFrame takes string frame, integer parent, integer id returns integer
+native DzDestroyFrame takes integer frame returns nothing
+native DzLoadToc takes string fileName returns nothing
+native DzFrameSetPoint takes integer frame, integer point, integer relativeFrame, integer relativePoint, real x, real y returns nothing
+native DzFrameSetAbsolutePoint takes integer frame, integer point, real x, real y returns nothing
+native DzFrameClearAllPoints takes integer frame returns nothing
+native DzFrameSetEnable takes integer name, boolean enable returns nothing
+native DzFrameSetScript takes integer frame, integer eventId, string func, boolean sync returns nothing
+native DzFrameSetScriptByCode takes integer frame, integer eventId, code funcHandle, boolean sync returns nothing
+native DzGetTriggerUIEventPlayer takes nothing returns player
+native DzGetTriggerUIEventFrame takes nothing returns integer
+native DzFrameFindByName takes string name, integer id returns integer
+native DzSimpleFrameFindByName takes string name, integer id returns integer
+native DzSimpleFontStringFindByName takes string name, integer id returns integer
+native DzSimpleTextureFindByName takes string name, integer id returns integer
+native DzGetGameUI takes nothing returns integer
+native DzClickFrame takes integer frame returns nothing
+native DzSetCustomFovFix takes real value returns nothing
+native DzEnableWideScreen takes boolean enable returns nothing
+native DzFrameSetText takes integer frame, string text returns nothing
+native DzFrameGetText takes integer frame returns string
+native DzFrameSetTextSizeLimit takes integer frame, integer size returns nothing
+native DzFrameGetTextSizeLimit takes integer frame returns integer
+native DzFrameSetTextColor takes integer frame, integer color returns nothing
+native DzGetMouseFocus takes nothing returns integer
+native DzFrameSetAllPoints takes integer frame, integer relativeFrame returns boolean
+native DzFrameSetFocus takes integer frame, boolean enable returns boolean
+native DzFrameSetModel takes integer frame, string modelFile, integer modelType, integer flag returns nothing
+native DzFrameGetEnable takes integer frame returns boolean
+native DzFrameSetAlpha takes integer frame, integer alpha returns nothing
+native DzFrameGetAlpha takes integer frame returns integer
+native DzFrameSetAnimate takes integer frame, integer animId, boolean autocast returns nothing
+native DzFrameSetAnimateOffset takes integer frame, real offset returns nothing
+native DzFrameSetTexture takes integer frame, string texture, integer flag returns nothing
+native DzFrameSetScale takes integer frame, real scale returns nothing
+native DzFrameSetTooltip takes integer frame, integer tooltip returns nothing
+native DzFrameCageMouse takes integer frame, boolean enable returns nothing
+native DzFrameGetValue takes integer frame returns real
+native DzFrameSetMinMaxValue takes integer frame, real minValue, real maxValue returns nothing
+native DzFrameSetStepValue takes integer frame, real step returns nothing
+native DzFrameSetValue takes integer frame, real value returns nothing
+native DzFrameSetSize takes integer frame, real w, real h returns nothing
+native DzCreateFrameByTagName takes string frameType, string name, integer parent, string template, integer id returns integer
+native DzFrameSetVertexColor takes integer frame, integer color returns nothing
+native EXGetUnitAbility takes unit u, integer abilcode returns ability
+native EXGetUnitAbilityByIndex takes unit u, integer index returns ability
+native EXGetAbilityId takes ability abil returns integer
+native EXGetAbilityState takes ability abil, integer state_type returns real
+native EXSetAbilityState takes ability abil, integer state_type, real value returns boolean
+native EXGetAbilityDataReal takes ability abil, integer level, integer data_type returns real
+native EXSetAbilityDataReal takes ability abil, integer level, integer data_type, real value returns boolean
+native EXGetAbilityDataInteger takes ability abil, integer level, integer data_type returns integer
+native EXSetAbilityDataInteger takes ability abil, integer level, integer data_type, integer value returns boolean
+native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
+native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
+native EXGetEventDamageData takes integer edd_type returns integer
+native EXSetEventDamage takes real amount returns boolean
+native DzAPI_Map_SaveServerValue takes player whichPlayer, string key, string value returns boolean
+native DzAPI_Map_GetServerValue takes player whichPlayer, string key returns string
+native DzAPI_Map_Ladder_SetStat takes player whichPlayer, string key, string value returns nothing
+native DzAPI_Map_IsRPGLadder takes nothing returns boolean
+native DzAPI_Map_GetGameStartTime takes nothing returns integer
+native DzAPI_Map_Stat_SetStat takes player whichPlayer, string key, string value returns nothing
+native DzAPI_Map_GetMatchType takes nothing returns integer
+native DzAPI_Map_Ladder_SetPlayerStat takes player whichPlayer, string key, string value returns nothing
+native DzAPI_Map_GetServerValueErrorCode takes player whichPlayer returns integer
+native DzAPI_Map_GetLadderLevel takes player whichPlayer returns integer
+native DzAPI_Map_IsRedVIP takes player whichPlayer returns boolean
+native DzAPI_Map_IsBlueVIP takes player whichPlayer returns boolean
+native DzAPI_Map_GetLadderRank takes player whichPlayer returns integer
+native DzAPI_Map_GetMapLevelRank takes player whichPlayer returns integer
+native DzAPI_Map_GetGuildName takes player whichPlayer returns string
+native DzAPI_Map_GetGuildRole takes player whichPlayer returns integer
+native DzAPI_Map_IsRPGLobby takes nothing returns boolean
+native DzAPI_Map_GetMapLevel takes player whichPlayer returns integer
+native DzAPI_Map_MissionComplete takes player whichPlayer, string key, string value returns nothing
+native DzAPI_Map_GetActivityData takes nothing returns string
+native DzAPI_Map_GetMapConfig takes string key returns string
+native DzAPI_Map_HasMallItem takes player whichPlayer, string key returns boolean
+native EXSetAbilityAEmeDataA takes ability abil,integer unitid returns boolean
+native EXGetItemDataString takes integer itemcode,integer data_type returns string
+native EXSetItemDataString takes integer itemcode,integer data_type,string value returns boolean
+native EXExecuteScript takes string script returns string
 
 
+//Generated method caller for Frame.onDestroy
+function sc__Frame_onDestroy takes integer this returns nothing
+            if s__Frame_id[this] != 0 then
+                call DzDestroyFrame(s__Frame_id[this])
+            endif
+            set s__Frame_id[this]=0
+endfunction
+
+//Generated allocator of Frame
+function s__Frame__allocate takes nothing returns integer
+ local integer this=si__Frame_F
+    if (this!=0) then
+        set si__Frame_F=si__Frame_V[this]
+    else
+        set si__Frame_I=si__Frame_I+1
+        set this=si__Frame_I
+    endif
+    if (this>8190) then
+        return 0
+    endif
+
+   set s__Frame_id[this]= 0
+   set s__Frame_isShow[this]= true
+   set s__Frame_isEnable[this]= true
+   set s__Frame_hover[this]= false
+    set si__Frame_V[this]=-1
+ return this
+endfunction
+
+//Generated destructor of Frame
+function sc__Frame_deallocate takes integer this returns nothing
+    if this==null then
+        return
+    elseif (si__Frame_V[this]!=-1) then
+        return
+    endif
+    set f__arg_this=this
+    call TriggerEvaluate(st__Frame_onDestroy)
+    set si__Frame_V[this]=si__Frame_F
+    set si__Frame_F=this
+endfunction
+
+//library FrameLibrary:
+        function s__Frame_numadd takes integer this returns nothing
+            set s__Frame_num=s__Frame_num + 1
+        endfunction
+        function s__Frame_getFrame takes integer id returns integer
+            local integer f= LoadInteger(s__Frame_HT, FRAME_ID, id)
+            if f == 0 then
+                set f=s__Frame__allocate()
+                set s__Frame_id[f]=id
+                call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            endif
+            return f
+        endfunction
+        function s__Frame_new takes string name,integer parent returns integer
+            local integer f= s__Frame__allocate()
+            set s__Frame_id[f]=DzCreateFrame(name, s__Frame_id[parent], 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newImage0 takes integer parent returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BACKDROP", "Frame_Image" + I2S(s__Frame_num), s__Frame_id[parent], "ImageTemplate", 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newImage1 takes integer parent,string path,real w,real h returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BACKDROP", "Frame_Image" + I2S(s__Frame_num), s__Frame_id[parent], "ImageTemplate", 0)
+            if path != null then
+                call DzFrameSetTexture(s__Frame_id[f], path, 0)
+            endif
+            call DzFrameSetSize(s__Frame_id[f], w, h)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newSprite takes integer parent,string path returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("SPRITE", "Frame_Sprite" + I2S(s__Frame_num), s__Frame_id[parent], "sprite", 0)
+            call DzFrameSetModel(s__Frame_id[f], path, 0, 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newTips takes integer parent,string path,real w,real h returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BACKDROP", "Frame_Image" + I2S(s__Frame_num), s__Frame_id[parent], path, 0)
+            call DzFrameSetSize(s__Frame_id[f], w, h)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newText0 takes integer parent,string ff returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("TEXT", "Frame_Text" + I2S(s__Frame_num), s__Frame_id[parent], ff, 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newText1 takes integer parent,string str,string ff returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("TEXT", "Frame_Text" + I2S(s__Frame_num), s__Frame_id[parent], ff, 0)
+            call DzFrameSetText(s__Frame_id[f], str)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newTextButton takes integer parent returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("GLUETEXTBUTTON", "Frame_Button" + I2S(s__Frame_num), s__Frame_id[parent], "template", 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newButton0 takes integer parent returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BUTTON", "Frame_Button" + I2S(s__Frame_num), s__Frame_id[parent], "ButtonTemplate", 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newButton1 takes integer parent,real w,real h returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BUTTON", "Frame_Button" + I2S(s__Frame_num), s__Frame_id[parent], "ButtonTemplate", 0)
+            call DzFrameSetSize(s__Frame_id[f], w, h)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newButtonEmpty0 takes integer parent returns integer
+             local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BUTTON", "Frame_ButtonEmpty" + I2S(s__Frame_num), s__Frame_id[parent], "ButtonTemplateEmpty", 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newButtonEmpty1 takes integer parent,real w,real h returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BUTTON", "Frame_ButtonEmpty" + I2S(s__Frame_num), s__Frame_id[parent], "ButtonTemplateEmpty", 0)
+            call DzFrameSetSize(s__Frame_id[f], w, h)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_newCloseButton takes integer parent returns integer
+            local integer f= s__Frame__allocate()
+            call s__Frame_numadd(f)
+            set s__Frame_id[f]=DzCreateFrameByTagName("BUTTON", "Frame_ButtonEmpty" + I2S(s__Frame_num), s__Frame_id[parent], "icon1", 0)
+            call SaveInteger(s__Frame_HT, FRAME_ID, s__Frame_id[f], f)
+            return f
+        endfunction
+        function s__Frame_setScale takes integer this,real r returns nothing
+            call DzFrameSetScale(s__Frame_id[this], r)
+        endfunction
+        function s__Frame_setColor takes integer this,integer c returns nothing
+            call DzFrameSetTextColor(s__Frame_id[this], c)
+        endfunction
+        function s__Frame_setSize takes integer this,real w,real h returns nothing
+            call DzFrameSetSize(s__Frame_id[this], w, h)
+        endfunction
+        function s__Frame_setTexture takes integer this,string path returns nothing
+            call DzFrameSetTexture(s__Frame_id[this], path, 0)
+        endfunction
+        function s__Frame_setText takes integer this,string str returns nothing
+            call DzFrameSetText(s__Frame_id[this], str)
+        endfunction
+        function s__Frame_setPoint takes integer this,integer a,integer tar,integer b,real x,real y returns nothing
+            call DzFrameSetPoint(s__Frame_id[this], a, s__Frame_id[tar], b, x, y)
+        endfunction
+        function s__Frame_setColor255 takes integer this,integer r,integer g,integer b returns nothing
+            call DzFrameSetTextColor(s__Frame_id[this], DzGetColor(255, r, g, b))
+        endfunction
+        function s__Frame_setAllPoints takes integer this,integer tar returns nothing
+            call DzFrameSetAllPoints(s__Frame_id[this], s__Frame_id[tar])
+        endfunction
+        function s__Frame_clearAllPoints takes integer this returns nothing
+            call DzFrameClearAllPoints(s__Frame_id[this])
+        endfunction
+        function s__Frame_regEvent takes integer this,integer i,code func returns nothing
+            call DzFrameSetScriptByCode(s__Frame_id[this], i, func, false)
+        endfunction
+        function s__Frame_regWheelEvent takes integer this,code func returns nothing
+            call DzFrameSetScriptByCode(s__Frame_id[this], 6, func, false)
+        endfunction
+        function s__Frame_regClickEvent takes integer this,code func returns nothing
+            call DzFrameSetScriptByCode(s__Frame_id[this], 1, func, false)
+        endfunction
+        function s__Frame_hide takes integer this returns nothing
+            call DzFrameShow(s__Frame_id[this], false)
+            set s__Frame_isShow[this]=false
+        endfunction
+        function s__Frame_show takes integer this returns nothing
+            call DzFrameShow(s__Frame_id[this], true)
+            set s__Frame_isShow[this]=true
+        endfunction
+        function s__Frame_toggle takes integer this returns nothing
+            if s__Frame_isShow[this] then
+                call DzFrameShow(s__Frame_id[this], false)
+                set s__Frame_isShow[this]=false
+            else
+                call DzFrameShow(s__Frame_id[this], true)
+                set s__Frame_isShow[this]=true
+            endif
+        endfunction
+        function s__Frame_toggerHover takes integer this,string path0,string path1 returns nothing
+            if s__Frame_hover[this] then
+                set s__Frame_hover[this]=false
+                call DzFrameSetTexture(s__Frame_id[this], path0, 0)
+            else
+                set s__Frame_hover[this]=true
+                call DzFrameSetTexture(s__Frame_id[this], path1, 0)
+            endif
+        endfunction
+        function s__Frame_enable takes integer this returns nothing
+            call DzFrameSetEnable(s__Frame_id[this], true)
+            set s__Frame_isEnable[this]=true
+        endfunction
+        function s__Frame_disable takes integer this returns nothing
+            call DzFrameSetEnable(s__Frame_id[this], false)
+            set s__Frame_isEnable[this]=false
+        endfunction
+        function s__Frame_setAlpha takes integer this,integer a returns nothing
+            call DzFrameSetAlpha(s__Frame_id[this], a)
+        endfunction
+        function s__Frame_onDestroy takes integer this returns nothing
+            if s__Frame_id[this] != 0 then
+                call DzDestroyFrame(s__Frame_id[this])
+            endif
+            set s__Frame_id[this]=0
+        endfunction
+
+//Generated destructor of Frame
+function s__Frame_deallocate takes integer this returns nothing
+    if this==null then
+        return
+    elseif (si__Frame_V[this]!=-1) then
+        return
+    endif
+    call s__Frame_onDestroy(this)
+    set si__Frame_V[this]=si__Frame_F
+    set si__Frame_F=this
+endfunction
+    function FrameLibrary__init takes nothing returns nothing
+        local integer f= DzFrameGetTooltip()
+        local real size= 0.75
+        set GUI=s__Frame_getFrame(DzGetGameUI())
+        //call openBoardButton.setText("任务")
+        //call DzFrameClearAllPoints(f)
+        //call DzFrameSetPoint(f, 7, DzGetGameUI(), 7, 0, .14)
+    endfunction
+
+//library FrameLibrary ends
 //library YDTriggerSaveLoadSystem:
     function YDTriggerSaveLoadSystem__Init takes nothing returns nothing
             set YDHT=InitHashtable()
@@ -477,7 +893,7 @@ endfunction
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Thu Jul 28 16:39:27 2022
+//   Date: Thu Jul 28 22:12:35 2022
 //   Map Author: zei_kale
 // 
 //===========================================================================
@@ -496,6 +912,425 @@ endfunction
 //TESH.scrollpos=0
 //TESH.alwaysfold=0
 // -- 引入其他依赖 --
+// 扩展库
+//hardware
+
+//获取鼠标在游戏内的坐标X
+
+//获取鼠标在游戏内的坐标Y
+
+//获取鼠标在游戏内的坐标Z
+
+//鼠标是否在游戏内
+
+//获取鼠标屏幕坐标X
+
+//获取鼠标屏幕坐标Y
+
+//获取鼠标游戏窗口坐标X
+
+//获取鼠标游戏窗口坐标Y
+
+//设置鼠标位置
+
+//注册鼠标点击触发（sync为true时，调用TriggerExecute。为false时，直接运行action函数，可以异步不掉线，action里不要有同步操作）
+
+
+//注册键盘点击触发
+
+
+//注册鼠标滚轮触发
+
+
+//注册鼠标移动触发
+
+
+//获取触发器的按键码
+
+//获取滚轮delta
+
+//判断按键是否按下
+
+//获取触发key的玩家
+
+//获取war3窗口宽度
+
+//获取war3窗口高度
+
+//获取war3窗口X坐标
+
+//获取war3窗口Y坐标
+
+//注册war3窗口大小变化事件
+
+
+//判断窗口是否激活
+
+//plus
+//设置可摧毁物位置
+
+//设置单位位置-本地调用
+
+//异步执行函数
+
+//取鼠标指向的unit
+
+//设置unit的贴图
+
+//设置内存数值
+
+//设置单位ID
+
+//设置单位模型
+
+//设置小地图背景图片
+
+//sync
+//注册数据同步trigger
+
+//同步游戏数据
+
+//获取同步的数据
+
+//获取同步数据的玩家
+
+//gui
+/////////////////////////////// 原生UI修改
+//隐藏界面元素
+
+//修改游戏世界窗口位置
+
+//头像
+
+//小地图
+
+//技能按钮
+
+//英雄按钮
+
+//英雄血条
+
+//英雄蓝条
+
+//道具按钮
+
+//小地图按钮
+
+//左上菜单按钮
+
+//鼠标提示
+
+//聊天信息
+
+//unit message
+
+//top message
+
+///////////////////////////////
+//取rgba色值
+
+//设置界面更新回调（非同步）
+
+
+//显示/隐藏Frame
+
+//创建frame
+
+//创建SimpleFrame
+
+//销毁frame
+
+//加载toc
+
+//设置frame相对位置
+
+//设置frame绝对位置
+
+//清空frame锚点
+
+//设置frame禁用/启用
+
+//注册UI事件回调
+
+
+//获取触发ui的玩家
+
+//获取触发的Frame
+
+//查找frame
+
+//查找SimpleFrame
+
+//查找String
+
+//查找Texture
+
+//获取game ui
+
+//点击frame
+
+//自定义屏幕比例
+
+//使用宽屏模式
+
+//设置文字（支持EditBox, TextFrame, TextArea, SimpleFontString、GlueEditBoxWar3、SlashChatBox、TimerTextFrame、TextButtonFrame、GlueTextButton）
+
+//获取文字（支持EditBox, TextFrame, TextArea, SimpleFontString）
+
+//设置字数限制（支持EditBox）
+
+//获取字数限制（支持EditBox）
+
+//设置文字颜色（支持TextFrame, EditBox）
+
+//获取鼠标所在位置的ui控件指针
+
+//设置所有锚点到目标frame上
+
+//设置焦点
+
+//设置模型（支持Sprite、Model、StatusBar）
+
+//获取控件是否启用
+
+//设置透明度（0-255）
+
+//获取透明度
+
+//设置动画
+
+//设置动画进度（autocast为false是可用）
+
+//设置texture（支持Backdrop、SimpleStatusBar）
+
+//设置缩放
+
+//设置tooltip
+
+//鼠标限制在ui内
+
+//获取当前值（支持Slider、SimpleStatusBar、StatusBar）
+
+//设置最大最小值（支持Slider、SimpleStatusBar、StatusBar）
+
+//设置Step值（支持Slider）
+
+//设置当前值（支持Slider、SimpleStatusBar、StatusBar）
+
+//设置frame大小
+
+//根据tag创建frame
+
+//设置颜色（支持SimpleStatusBar）
+
+// japi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//library DzAPI ends
+// japi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//library DzAPI:
+function GetPlayerServerValueSuccess takes player whichPlayer returns boolean
+	if ( DzAPI_Map_GetServerValueErrorCode(whichPlayer) == 0 ) then
+		return true
+	else
+		return false
+	endif
+endfunction
+function DzAPI_Map_StoreInteger takes player whichPlayer,string key,integer value returns nothing
+	set key="I" + key
+	call DzAPI_Map_SaveServerValue(whichPlayer, key, I2S(value))
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredInteger takes player whichPlayer,string key returns integer
+ local integer value
+	set key="I" + key
+	set value=S2I(DzAPI_Map_GetServerValue(whichPlayer, key))
+	set key=null
+	set whichPlayer=null
+	return value
+endfunction
+function DzAPI_Map_StoreReal takes player whichPlayer,string key,real value returns nothing
+	set key="R" + key
+	call DzAPI_Map_SaveServerValue(whichPlayer, key, R2S(value))
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredReal takes player whichPlayer,string key returns real
+ local real value
+	set key="R" + key
+	set value=S2R(DzAPI_Map_GetServerValue(whichPlayer, key))
+	set key=null
+	set whichPlayer=null
+	return value
+endfunction
+function DzAPI_Map_StoreBoolean takes player whichPlayer,string key,boolean value returns nothing
+	set key="B" + key
+	if ( value ) then
+		call DzAPI_Map_SaveServerValue(whichPlayer, key, "1")
+	else
+		call DzAPI_Map_SaveServerValue(whichPlayer, key, "0")
+	endif
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredBoolean takes player whichPlayer,string key returns boolean
+ local boolean value
+	set key="B" + key
+	set key=DzAPI_Map_GetServerValue(whichPlayer, key)
+	if ( key == "1" ) then
+		set value=true
+	else
+		set value=false
+	endif
+	set key=null
+	set whichPlayer=null
+	return value
+endfunction
+function DzAPI_Map_StoreString takes player whichPlayer,string key,string value returns nothing
+	set key="S" + key
+	call DzAPI_Map_SaveServerValue(whichPlayer, key, value)
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredString takes player whichPlayer,string key returns string
+	return DzAPI_Map_GetServerValue(whichPlayer, "S" + key)
+endfunction
+function DzAPI_Map_GetStoredUnitType takes player whichPlayer,string key returns integer
+ local integer value
+	set key="I" + key
+	set value=S2I(DzAPI_Map_GetServerValue(whichPlayer, key))
+	set key=null
+	set whichPlayer=null
+	return value
+endfunction
+function DzAPI_Map_GetStoredAbilityId takes player whichPlayer,string key returns integer
+ local integer value
+	set key="I" + key
+	set value=S2I(DzAPI_Map_GetServerValue(whichPlayer, key))
+	set key=null
+	set whichPlayer=null
+	return value
+endfunction
+function DzAPI_Map_FlushStoredMission takes player whichPlayer,string key returns nothing
+	call DzAPI_Map_SaveServerValue(whichPlayer, key, null)
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_Ladder_SubmitIntegerData takes player whichPlayer,string key,integer value returns nothing
+	call DzAPI_Map_Ladder_SetStat(whichPlayer, key, I2S(value))
+endfunction
+function DzAPI_Map_Stat_SubmitUnitIdData takes player whichPlayer,string key,integer value returns nothing
+	if ( value == 0 ) then
+		//call DzAPI_Map_Ladder_SetStat(whichPlayer,key,"0")
+	else
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, I2S(value))
+	endif
+endfunction
+function DzAPI_Map_Stat_SubmitUnitData takes player whichPlayer,string key,unit value returns nothing
+	call DzAPI_Map_Stat_SubmitUnitIdData(whichPlayer , key , GetUnitTypeId(value))
+endfunction
+function DzAPI_Map_Ladder_SubmitAblityIdData takes player whichPlayer,string key,integer value returns nothing
+	if ( value == 0 ) then
+		//call DzAPI_Map_Ladder_SetStat(whichPlayer,key,"0")
+	else
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, I2S(value))
+	endif
+endfunction
+function DzAPI_Map_Ladder_SubmitItemIdData takes player whichPlayer,string key,integer value returns nothing
+ local string l__S
+	if ( value == 0 ) then
+		set l__S="0"
+	else
+		set l__S=I2S(value)
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, l__S)
+	endif
+	//call DzAPI_Map_Ladder_SetStat(whichPlayer,key,S)
+	set l__S=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_Ladder_SubmitItemData takes player whichPlayer,string key,item value returns nothing
+	call DzAPI_Map_Ladder_SubmitItemIdData(whichPlayer , key , GetItemTypeId(value))
+endfunction
+function DzAPI_Map_Ladder_SubmitBooleanData takes player whichPlayer,string key,boolean value returns nothing
+	if ( value ) then
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, "1")
+	else
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, "0")
+	endif
+endfunction
+function DzAPI_Map_Ladder_SubmitTitle takes player whichPlayer,string value returns nothing
+	call DzAPI_Map_Ladder_SetStat(whichPlayer, value, "1")
+endfunction
+function DzAPI_Map_Ladder_SubmitPlayerRank takes player whichPlayer,integer value returns nothing
+	call DzAPI_Map_Ladder_SetPlayerStat(whichPlayer, "RankIndex", I2S(value))
+endfunction
+function DzAPI_Map_Ladder_SubmitPlayerExtraExp takes player whichPlayer,integer value returns nothing
+	call DzAPI_Map_Ladder_SetStat(whichPlayer, "ExtraExp", I2S(value))
+endfunction
 // 刷怪
 
 // 执行刷怪系统
@@ -832,6 +1667,23 @@ function percentDamage takes unit u,real percent,boolean maxFlag returns nothing
     call SetWidgetLife(u, hp)
 endfunction
 // 系统放到最后
+function keyInput takes nothing returns nothing
+ local string s= GetEventPlayerChatString()
+ local player p= GetTriggerPlayer()
+ local integer i= GetPlayerId(p) + 1
+    set p=null
+endfunction
+function keyInputSystem takes nothing returns nothing
+ local trigger t= CreateTrigger()
+ local integer i= 1
+	loop
+		exitwhen i > PLAYER_COUNT
+		call TriggerRegisterPlayerChatEvent(t, Player(i - 1), "", true)
+		set i=i + 1
+	endloop
+	call TriggerAddAction(t, function keyInput)
+	set t=null
+endfunction
 function everySecondAction takes nothing returns nothing
     local group g= CreateGroup()
     local unit u= null
@@ -1084,7 +1936,8 @@ call InitSpawn() // 初始化刷怪系统
 call initHeroSelection() // 初始化英雄选择系统
 call initDenomSelection() // 初始化门派选择
 
-	call TimerStart(CreateTimer(), 1, true, function everySecondAction) // 每秒钟调用一次 // INLINED!!
+	call keyInputSystem() // 初始化键盘输入系统
+call TimerStart(CreateTimer(), 1, true, function everySecondAction) // 每秒钟调用一次 // INLINED!!
 call UnitAttack() // 注册单位攻击事件
 call UseAbility() // 注册使用技能事件
 call UnitDamage() // 注册任意单位伤害事件
@@ -1311,6 +2164,8 @@ function main takes nothing returns nothing
     call SetMapMusic("Music", true, 0)
     call InitBlizzard()
 
+call ExecuteFunc("jasshelper__initstructs184855093")
+call ExecuteFunc("FrameLibrary__init")
 call ExecuteFunc("YDTriggerSaveLoadSystem__Init")
 call ExecuteFunc("YDWETimerSystem__Init")
 
@@ -1354,4 +2209,19 @@ endfunction
 
 
 //Struct method generated initializers/callers:
+function sa__Frame_onDestroy takes nothing returns boolean
+local integer this=f__arg_this
+            if s__Frame_id[this] != 0 then
+                call DzDestroyFrame(s__Frame_id[this])
+            endif
+            set s__Frame_id[this]=0
+   return true
+endfunction
+
+function jasshelper__initstructs184855093 takes nothing returns nothing
+    set st__Frame_onDestroy=CreateTrigger()
+    call TriggerAddCondition(st__Frame_onDestroy,Condition( function sa__Frame_onDestroy))
+
+
+endfunction
 
