@@ -1,4 +1,9 @@
 globals
+//globals from YDTriggerSaveLoadSystem:
+constant boolean LIBRARY_YDTriggerSaveLoadSystem=true
+hashtable YDHT
+hashtable YDLOC
+//endglobals from YDTriggerSaveLoadSystem
 //globals from YDWEPolledWaitNull:
 constant boolean LIBRARY_YDWEPolledWaitNull=true
 //endglobals from YDWEPolledWaitNull
@@ -14,6 +19,27 @@ trigger YDWETriggerEvent___MoveItemEventTrigger= null
 trigger array YDWETriggerEvent___MoveItemEventQueue
 integer YDWETriggerEvent___MoveItemEventNumber= 0
 //endglobals from YDWETriggerEvent
+//globals from YDWETimerSystem:
+constant boolean LIBRARY_YDWETimerSystem=true
+integer YDWETimerSystem___CurrentTime
+integer YDWETimerSystem___CurrentIndex
+integer YDWETimerSystem___TaskListHead
+integer YDWETimerSystem___TaskListIdleHead
+integer YDWETimerSystem___TaskListIdleMax
+integer array YDWETimerSystem___TaskListIdle
+integer array YDWETimerSystem___TaskListNext
+integer array YDWETimerSystem___TaskListTime
+trigger array YDWETimerSystem___TaskListProc
+trigger YDWETimerSystem___fnRemoveUnit
+trigger YDWETimerSystem___fnDestroyTimer
+trigger YDWETimerSystem___fnRemoveItem
+trigger YDWETimerSystem___fnDestroyEffect
+trigger YDWETimerSystem___fnDestroyLightning
+trigger YDWETimerSystem___fnRunTrigger
+timer YDWETimerSystem___Timer
+integer YDWETimerSystem___TimerHandle
+integer YDWETimerSystem___TimerSystem_RunIndex= 0
+//endglobals from YDWETimerSystem
     // Generated
 trigger gg_trg_firstOccur= null
 trigger gg_trg_firstOccur_2= null
@@ -40,17 +66,22 @@ unit array heroInSelection
 string array heroDescription
 real array heroBornPoint
 constant integer KUI_HUA_ITEM= 'I000'
-constant integer JU_JING_ITEM= 'I000'
-constant integer TIAN_YING_ITEM= 'I000'
-constant integer QING_LIANG_ITEM= 'I000'
-constant integer FEI_MA_ITEM= 'I000'
-constant integer LU_JIA_ITEM= 'I000'
-constant integer JIN_DAO_ITEM= 'I000'
-constant integer TIAN_DI_ITEM= 'I000'
+constant integer JU_JING_ITEM= 'I001'
+constant integer TIAN_YING_ITEM= 'I002'
+constant integer QING_LIANG_ITEM= 'I003'
+constant integer FEI_MA_ITEM= 'I004'
+constant integer LU_JIA_ITEM= 'I005'
+constant integer JIN_DAO_ITEM= 'I006'
+constant integer TIAN_DI_ITEM= 'I007'
 
 constant integer DENOM_NUMBER= 8
 integer array denomListItem
 integer array heroDenom
+string array denomName
+integer array denomFirst
+integer array denomSecond
+integer array denomThird
+integer array denomFourth
 constant integer PLAYER_COUNT= 5
 	// 悟性，决定技能升重的速度
 integer array intellect
@@ -60,14 +91,22 @@ integer array strength
 integer array luck
 	// 医术，决定英雄血和蓝的恢复能力
 integer array medical
-hashtable YDHT= InitHashtable()
+constant integer LING_BO_WEI_BU= 'A000'
 
+trigger l__library_init
 
 //JASSHelper struct globals:
 
 endglobals
 
 
+//library YDTriggerSaveLoadSystem:
+    function YDTriggerSaveLoadSystem___Init takes nothing returns nothing
+            set YDHT=InitHashtable()
+        set YDLOC=InitHashtable()
+    endfunction
+
+//library YDTriggerSaveLoadSystem ends
 //library YDWEPolledWaitNull:
 function YDWEPolledWaitNull takes real duration returns nothing
     local timer t
@@ -178,13 +217,231 @@ function GetLastMovedItemInItemSlot takes nothing returns item
 endfunction
 
 //library YDWETriggerEvent ends
+//library YDWETimerSystem:
+function YDWETimerSystem___NewTaskIndex takes nothing returns integer
+ local integer h= YDWETimerSystem___TaskListIdleHead
+	if YDWETimerSystem___TaskListIdleHead < 0 then
+		if YDWETimerSystem___TaskListIdleMax >= 8000 then
+			return 8100
+		else
+			set YDWETimerSystem___TaskListIdleMax=YDWETimerSystem___TaskListIdleMax + 1
+			return YDWETimerSystem___TaskListIdleMax
+		endif
+	endif
+	set YDWETimerSystem___TaskListIdleHead=YDWETimerSystem___TaskListIdle[h]
+	return h
+endfunction
+function YDWETimerSystem___DeleteTaskIndex takes integer index returns nothing
+	set YDWETimerSystem___TaskListIdle[index]=YDWETimerSystem___TaskListIdleHead
+	set YDWETimerSystem___TaskListIdleHead=index
+endfunction
+//�ú������д���
+function YDWETimerSystem___NewTask takes real time,trigger proc returns integer
+ local integer index= YDWETimerSystem___NewTaskIndex()
+ local integer h= YDWETimerSystem___TaskListHead
+ local integer t= R2I(100. * time) + YDWETimerSystem___CurrentTime
+ local integer p
+	set YDWETimerSystem___TaskListProc[index]=proc
+	set YDWETimerSystem___TaskListTime[index]=t
+	loop
+		set p=YDWETimerSystem___TaskListNext[h]
+		if p < 0 or YDWETimerSystem___TaskListTime[p] >= t then
+		//	call BJDebugMsg("NewTask:"+I2S(index))
+			set YDWETimerSystem___TaskListNext[h]=index
+			set YDWETimerSystem___TaskListNext[index]=p
+			return index
+		endif
+		set h=p
+	endloop
+	return index
+endfunction
+function YDWETimerSystemNewTask takes real time,trigger proc returns integer
+	return YDWETimerSystem___NewTask(time , proc)
+endfunction
+function YDWETimerSystemGetCurrentTask takes nothing returns integer
+	return YDWETimerSystem___CurrentIndex
+endfunction
+//ɾ����λ
+function YDWETimerSystem___RemoveUnit_CallBack takes nothing returns nothing
+    call RemoveUnit(LoadUnitHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerRemoveUnit takes real time,unit u returns nothing
+    call SaveUnitHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___NewTask(time , YDWETimerSystem___fnRemoveUnit), u)
+endfunction
+//�ݻټ�ʱ��
+function YDWETimerSystem___DestroyTimer_CallBack takes nothing returns nothing
+    call DestroyTimer(LoadTimerHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerDestroyTimer takes real time,timer t returns nothing
+    call SaveTimerHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___NewTask(time , YDWETimerSystem___fnDestroyTimer), t)
+endfunction
+//ɾ����Ʒ
+function YDWETimerSystem___RemoveItem_CallBack takes nothing returns nothing
+    call RemoveItem(LoadItemHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerRemoveItem takes real time,item it returns nothing
+    call SaveItemHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___NewTask(time , YDWETimerSystem___fnRemoveItem), it)
+endfunction
+//ɾ����Ч
+function YDWETimerSystem___DestroyEffect_CallBack takes nothing returns nothing
+    call DestroyEffect(LoadEffectHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerDestroyEffect takes real time,effect e returns nothing
+    call SaveEffectHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___NewTask(time , YDWETimerSystem___fnDestroyEffect), e)
+endfunction
+//ɾ��������Ч
+function YDWETimerSystem___DestroyLightning_CallBack takes nothing returns nothing
+    call DestroyLightning(LoadLightningHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerDestroyLightning takes real time,lightning lt returns nothing
+ local integer i= YDWETimerSystem___NewTask(time , YDWETimerSystem___fnDestroyLightning)
+    call SaveLightningHandle(YDHT, YDWETimerSystem___TimerHandle, i, lt)
+endfunction
+//���д�����
+function YDWETimerSystem___RunTrigger_CallBack takes nothing returns nothing
+    call TriggerExecute(LoadTriggerHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex))
+    call RemoveSavedHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___CurrentIndex)
+endfunction
+function YDWETimerRunTrigger takes real time,trigger trg returns nothing
+    call SaveTriggerHandle(YDHT, YDWETimerSystem___TimerHandle, YDWETimerSystem___NewTask(time , YDWETimerSystem___fnRunTrigger), trg)
+endfunction
+//ɾ��Ư������
+function YDWETimerDestroyTextTag takes real time,texttag tt returns nothing
+    local integer N=0
+    local integer i=0
+    if time <= 0 then
+        set time=0.01
+    endif
+    call SetTextTagPermanent(tt, false)
+    call SetTextTagLifespan(tt, time)
+    call SetTextTagFadepoint(tt, time)
+endfunction
+//���ļ�ʱ��������
+function YDWETimerSystem___Main takes nothing returns nothing
+ local integer h= YDWETimerSystem___TaskListHead
+ local integer p
+	loop
+		set YDWETimerSystem___CurrentIndex=YDWETimerSystem___TaskListNext[h]
+		exitwhen YDWETimerSystem___CurrentIndex < 0 or YDWETimerSystem___CurrentTime < YDWETimerSystem___TaskListTime[YDWETimerSystem___CurrentIndex]
+		//call BJDebugMsg("Task:"+I2S(CurrentIndex))
+		call TriggerEvaluate(YDWETimerSystem___TaskListProc[YDWETimerSystem___CurrentIndex])
+		call YDWETimerSystem___DeleteTaskIndex(YDWETimerSystem___CurrentIndex)
+		set YDWETimerSystem___TaskListNext[h]=YDWETimerSystem___TaskListNext[YDWETimerSystem___CurrentIndex]
+	endloop
+	set YDWETimerSystem___CurrentTime=YDWETimerSystem___CurrentTime + 1
+endfunction
+//��ʼ������
+function YDWETimerSystem___Init takes nothing returns nothing
+    set YDWETimerSystem___Timer=CreateTimer()
+	set YDWETimerSystem___TimerHandle=GetHandleId(YDWETimerSystem___Timer)
+	set YDWETimerSystem___CurrentTime=0
+	set YDWETimerSystem___TaskListHead=0
+	set YDWETimerSystem___TaskListNext[0]=- 1
+	set YDWETimerSystem___TaskListIdleHead=1
+	set YDWETimerSystem___TaskListIdleMax=1
+	set YDWETimerSystem___TaskListIdle[1]=- 1
+	
+	set YDWETimerSystem___fnRemoveUnit=CreateTrigger()
+	set YDWETimerSystem___fnDestroyTimer=CreateTrigger()
+	set YDWETimerSystem___fnRemoveItem=CreateTrigger()
+	set YDWETimerSystem___fnDestroyEffect=CreateTrigger()
+	set YDWETimerSystem___fnDestroyLightning=CreateTrigger()
+	set YDWETimerSystem___fnRunTrigger=CreateTrigger()
+	call TriggerAddCondition(YDWETimerSystem___fnRemoveUnit, Condition(function YDWETimerSystem___RemoveUnit_CallBack))
+	call TriggerAddCondition(YDWETimerSystem___fnDestroyTimer, Condition(function YDWETimerSystem___DestroyTimer_CallBack))
+	call TriggerAddCondition(YDWETimerSystem___fnRemoveItem, Condition(function YDWETimerSystem___RemoveItem_CallBack))
+	call TriggerAddCondition(YDWETimerSystem___fnDestroyEffect, Condition(function YDWETimerSystem___DestroyEffect_CallBack))
+	call TriggerAddCondition(YDWETimerSystem___fnDestroyLightning, Condition(function YDWETimerSystem___DestroyLightning_CallBack))
+	call TriggerAddCondition(YDWETimerSystem___fnRunTrigger, Condition(function YDWETimerSystem___RunTrigger_CallBack))
+	
+    call TimerStart(YDWETimerSystem___Timer, 0.01, true, function YDWETimerSystem___Main)
+endfunction
+//ѭ�������ö�����ʱ��
+function YDWETimerSystemGetRunIndex takes nothing returns integer
+    return YDWETimerSystem___TimerSystem_RunIndex
+endfunction
+function YDWETimerSystem___RunPeriodicTriggerFunction takes nothing returns nothing
+    local integer tid= GetHandleId(GetExpiredTimer())
+    local trigger trg= LoadTriggerHandle(YDHT, tid, $D0001)
+	call SaveInteger(YDHT, StringHash(I2S(GetHandleId(trg))), StringHash("RunIndex"), LoadInteger(YDHT, tid, $D0002))
+    if TriggerEvaluate(trg) then
+        call TriggerExecute(trg)
+    endif
+    set trg=null
+endfunction
+function YDWETimerSystem___RunPeriodicTriggerFunctionByTimes takes nothing returns nothing
+    local integer tid= GetHandleId(GetExpiredTimer())
+    local trigger trg= LoadTriggerHandle(YDHT, tid, $D0001)
+    local integer times= LoadInteger(YDHT, tid, $D0003)
+	call SaveInteger(YDHT, StringHash(I2S(GetHandleId(trg))), StringHash("RunIndex"), LoadInteger(YDHT, tid, $D0002))
+    if TriggerEvaluate(trg) then
+        call TriggerExecute(trg)
+    endif
+    set times=times - 1
+    if times > 0 then
+		call SaveInteger(YDHT, tid, $D0003, times)
+      else
+        call DestroyTimer(GetExpiredTimer())
+        call FlushChildHashtable(YDHT, tid)
+    endif
+    set trg=null
+endfunction
+function YDWETimerRunPeriodicTrigger takes real timeout,trigger trg,boolean b,integer times,integer data returns nothing
+    local timer t
+    local integer tid
+    local integer index= 0
+    if timeout < 0 then
+        return
+      else
+        set t=CreateTimer()
+		set tid=GetHandleId(t)
+    endif
+    set YDWETimerSystem___TimerSystem_RunIndex=YDWETimerSystem___TimerSystem_RunIndex + 1
+	call SaveTriggerHandle(YDHT, tid, $D0001, trg)
+	call SaveInteger(YDHT, tid, $D0002, YDWETimerSystem___TimerSystem_RunIndex)
+	set index=LoadInteger(YDHT, GetHandleId(trg), 'YDTS' + data)
+    set index=index + 1
+	call SaveInteger(YDHT, GetHandleId(trg), 'YDTS' + data, index)
+	call SaveTimerHandle(YDHT, GetHandleId(trg), ( 'YDTS' + data ) * index, t)
+	
+    if b == false then
+		call SaveInteger(YDHT, tid, $D0003, times)
+        call TimerStart(t, timeout, true, function YDWETimerSystem___RunPeriodicTriggerFunctionByTimes)
+      else
+        call TimerStart(t, timeout, true, function YDWETimerSystem___RunPeriodicTriggerFunction)
+    endif
+    set t=null
+endfunction
+function YDWETimerRunPeriodicTriggerOver takes trigger trg,integer data returns nothing
+ local integer trgid= GetHandleId(trg)
+    local integer index= LoadInteger(YDHT, trgid, 'YDTS' + data)
+    local timer t
+    loop
+        exitwhen index <= 0
+        set t=LoadTimerHandle(YDHT, trgid, ( 'YDTS' + data ) * index)
+        call DestroyTimer(t)
+        call FlushChildHashtable(YDHT, GetHandleId(t))
+		call RemoveSavedHandle(YDHT, trgid, ( 'YDTS' + data ) * index)
+        set index=index - 1
+    endloop
+	
+    call RemoveSavedInteger(YDHT, trgid, 'YDTS' + data)
+    set t=null
+endfunction
+
+//library YDWETimerSystem ends
 //===========================================================================
 // 
 // 小人物的江湖
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Wed Jul 27 15:38:29 2022
+//   Date: Thu Jul 28 15:05:57 2022
 //   Map Author: zei_kale
 // 
 //===========================================================================
@@ -393,10 +650,10 @@ function joinDenom takes unit u,item it returns nothing
         exitwhen j > DENOM_NUMBER
         if GetItemTypeId(it) == denomListItem[j] then
             set heroDenom[i]=j
-			// call DisplayTimedTextToPlayer(p, 0, 0, 15., "|CFFff9933恭喜加入〓少林派〓，请在NPC郭靖处选择副职|r")
-			// call SetPlayerName(p, "〓少林派〓" + LoadStr(YDHT, GetHandleId(p), GetHandleId(p)))
-			// call DisplayTimedTextToPlayer(p, 0, 0, 15., "|CFFff9933获得武功：凌波微步（可以在主城和传送石之间任意传送了）\n获得新手大礼包（可以在背包中打开获得惊喜哦）")
-			// call UnitAddAbility(u, 'A05R')
+			call DisplayTimedTextToPlayer(p, 0, 0, 15., "|CFFff9933恭喜加入〓" + denomName[j] + "〓，请在NPC郭靖处选择副职|r")
+			call SetPlayerName(p, "〓" + denomName[j] + "〓" + LoadStr(YDHT, GetHandleId(p), GetHandleId(p)))
+			call DisplayTimedTextToPlayer(p, 0, 0, 15., "|CFFff9933获得武功：凌波微步（可以在主城和传送石之间任意传送了）\n获得新手大礼包（可以在背包中打开获得惊喜哦）")
+			call UnitAddAbility(u, LING_BO_WEI_BU)
 			// call AddCharacterABuff(udg_hero[i], udg_xinggeA[i])
 			// call AddCharacterBBuff(udg_hero[i], udg_xinggeB[i])
 			// if udg_vip[i] < 2 and udg_elevenvip[i] < 1 then
@@ -413,7 +670,7 @@ function joinDenom takes unit u,item it returns nothing
 			// set gengu[i] = (gengu[i] + 3)
 			// set jingmai[i] = (jingmai[i] + 2)
 			// call RemoveLocation(Q4)
-			// call UnitAddItemByIdSwapped(1227896394, u)
+            call UnitAddItemById(u, 'I100')
         endif
         set j=j + 1
     endloop
@@ -430,11 +687,98 @@ function initDenomSelection takes nothing returns nothing
     set denomListItem[6]=LU_JIA_ITEM
     set denomListItem[7]=JIN_DAO_ITEM
     set denomListItem[8]=TIAN_DI_ITEM
+    set denomName[1]="葵花派"
+    set denomFirst[1]='A000'
+    set denomSecond[1]='A000'
+    set denomThird[1]='A000'
+    set denomFourth[1]='A000'
+    set denomName[2]="巨鲸帮"
+    set denomFirst[2]='A001'
+    set denomSecond[2]='A001'
+    set denomThird[2]='A001'
+    set denomFourth[2]='A001'
+    set denomName[3]="天鹰教"
+    set denomFirst[3]='A002'
+    set denomSecond[3]='A002'
+    set denomThird[3]='A002'
+    set denomFourth[3]='A002'
+    set denomName[4]="清凉寺"
+    set denomFirst[4]='A003'
+    set denomSecond[4]='A003'
+    set denomThird[4]='A003'
+    set denomFourth[4]='A003'
+    set denomName[5]="飞马镖局"
+    set denomFirst[5]='A004'
+    set denomSecond[5]='A004'
+    set denomThird[5]='A004'
+    set denomFourth[5]='A004'
+    set denomName[6]="陆家庄"
+    set denomFirst[6]='A005'
+    set denomSecond[6]='A005'
+    set denomThird[6]='A005'
+    set denomFourth[6]='A005'
+    set denomName[7]="金刀寨"
+    set denomFirst[7]='A006'
+    set denomSecond[7]='A006'
+    set denomThird[7]='A006'
+    set denomFourth[7]='A006'
+    set denomName[8]="天地会"
+    set denomFirst[8]='A007'
+    set denomSecond[8]='A007'
+    set denomThird[8]='A007'
+    set denomFourth[8]='A007'
     loop
         exitwhen j > PLAYER_COUNT
         set heroDenom[j]=0
+        call SaveStr(YDHT, GetHandleId(Player(j - 1)), GetHandleId(Player(j - 1)), GetPlayerName(Player(j - 1)))
         set j=j + 1
     endloop
+endfunction
+// 通用系统
+
+ function doApplyGeneralDebuff takes integer buffnum,integer num,unit uc,integer id,integer orderid,unit ut,string s returns nothing
+ local unit u
+ local player p
+ local location loc
+	if ( buffnum == num ) then
+		set p=GetOwningPlayer(uc)
+		set loc=GetUnitLoc(ut)
+		call CreateNUnitsAtLoc(1, 'e000', p, loc, bj_UNIT_FACING)
+    	set u=bj_lastCreatedUnit
+    	call ShowUnitHide(u)
+		call UnitAddAbility(u, id)
+		if ( num == 12 or num == 14 ) then
+			call IncUnitAbilityLevel(u, id)
+		endif
+    	call IssueTargetOrderById(u, orderid, ut)
+    	call UnitApplyTimedLife(u, 'BHwe', 2.)
+    	call CreateTextTagLocBJ(s, loc, 60., 12., 65., 55., 42., 0)
+		call YDWETimerDestroyTextTag(3. , bj_lastCreatedTextTag)
+    	call SetTextTagVelocityBJ(bj_lastCreatedTextTag, 100., 90)
+		call RemoveLocation(loc)
+	endif
+	set loc=null
+	set p=null
+	set u=null
+endfunction
+function applyGeneralDebuff takes unit u,unit ut,integer buffnum returns nothing
+    call doApplyGeneralDebuff(buffnum , 1 , u , 'A001' , $D008F , ut , "内伤")
+    call doApplyGeneralDebuff(buffnum , 2 , u , 'A002' , $D02BC , ut , "走火入魔")
+    call doApplyGeneralDebuff(buffnum , 3 , u , 'A003' , $D022F , ut , "流血")
+    call doApplyGeneralDebuff(buffnum , 4 , u , 'A004' , $D00DD , ut , "混乱")
+    call doApplyGeneralDebuff(buffnum , 5 , u , 'A005' , $D006B , ut , "昏迷")
+    call doApplyGeneralDebuff(buffnum , 6 , u , 'A006' , $D006B , ut , "重伤")
+    call doApplyGeneralDebuff(buffnum , 7 , u , 'A007' , $D022F , ut , "血流不止")
+    call doApplyGeneralDebuff(buffnum , 8 , u , 'A008' , $D00DE , ut , "麻痹")
+    call doApplyGeneralDebuff(buffnum , 9 , u , 'A009' , $D00B5 , ut , "破防")
+    call doApplyGeneralDebuff(buffnum , 10 , u , 'A00A' , $D00DE , ut , "神经错乱")
+    call doApplyGeneralDebuff(buffnum , 11 , u , 'A00B' , $D007F , ut , "封穴")
+    call doApplyGeneralDebuff(buffnum , 12 , u , 'A00B' , $D007F , ut , "穴位全封")
+	call doApplyGeneralDebuff(buffnum , 13 , u , 'A00C' , $D022F , ut , "中毒")
+	call doApplyGeneralDebuff(buffnum , 14 , u , 'A00C' , $D022F , ut , "深度中毒")
+    call doApplyGeneralDebuff(buffnum , 15 , u , 'A00D' , $D00DE , ut , "致盲")
+    call doApplyGeneralDebuff(buffnum , 16 , u , 'A00E' , $D00DE , ut , "虚弱")
+    call doApplyGeneralDebuff(buffnum , 17 , u , 'A0EW' , $D007F , ut , "冰冻")
 endfunction
 // 系统放到最后
 // 单位受到攻击
@@ -638,6 +982,7 @@ endfunction
 // Trigger: firstOccur-2
 //===========================================================================
 function Trig_firstOccur_2Actions takes nothing returns nothing
+    call YDWETimerDestroyTextTag(2 , GetLastCreatedTextTag())
     call YDWEPolledWaitNull(2)
 endfunction
 //===========================================================================
@@ -835,6 +1180,8 @@ function main takes nothing returns nothing
     call SetMapMusic("Music", true, 0)
     call InitBlizzard()
 
+call ExecuteFunc("YDTriggerSaveLoadSystem___Init")
+call ExecuteFunc("YDWETimerSystem___Init")
 
     call InitGlobals()
     call InitCustomTriggers()
@@ -868,6 +1215,9 @@ endfunction
 //�Զ����¼� 
 //===========================================================================
 //===========================================================================   
+//===========================================================================
+//ϵͳ-TimerSystem
+//===========================================================================
 
 
 

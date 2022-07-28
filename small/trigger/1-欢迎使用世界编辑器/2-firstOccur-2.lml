@@ -1,5 +1,8 @@
 事件
 条件
 动作
+    YDWETimerDestroyTextTag
+        常量: 2
+        函数: GetLastCreatedTextTag
     PolledWait
         常量: 2

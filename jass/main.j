@@ -9,6 +9,9 @@
 // 选择门派
 #include "logic/DenomSelection.j"
 
+// 通用系统
+#include "systems/GeneralDebuff.j"
+
 // 系统放到最后
 #include "systems/UnitAttack.j"
 #include "systems/UseAbility.j"
@@ -27,8 +30,6 @@ globals
 	integer array luck
 	// 医术，决定英雄血和蓝的恢复能力
 	integer array medical
-
-	hashtable YDHT = InitHashtable()
 
 	constant integer LING_BO_WEI_BU = 'A000'
 endglobals
