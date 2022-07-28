@@ -13,6 +13,7 @@
 #include "systems/GeneralDebuff.j"
 
 // 系统放到最后
+#include "systems/EverySecond.j"
 #include "systems/UnitAttack.j"
 #include "systems/UseAbility.j"
 #include "systems/UnitDamage.j"
@@ -55,6 +56,7 @@ function mapInit takes nothing returns nothing
 	call initHeroSelection() // 初始化英雄选择系统
 	call initDenomSelection() // 初始化门派选择
 
+	call everySecond() // 每秒钟调用一次
 	call UnitAttack() // 注册单位攻击事件
 	call UseAbility() // 注册使用技能事件
 	call UnitDamage() // 注册任意单位伤害事件
