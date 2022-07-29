@@ -39,6 +39,9 @@ function PickupItem_Conditions takes nothing returns boolean
 	if isJoinDenom(u, it) then
 		call joinDenom(u, it)
 	endif
+
+	// 接受护送类任务
+	call acceptProtectTask(u, it)
 	
 	set u = null
 	set it = null

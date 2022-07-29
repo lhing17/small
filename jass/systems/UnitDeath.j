@@ -4,6 +4,7 @@ function UnitDeath_Conditions takes nothing returns boolean
 	local unit ut = GetTriggerUnit()
 	local integer i = 1 + GetPlayerId(GetOwningPlayer(u))
 
+	call onProtectTaskTargetDead(ut)
 	
 	set u = null
 	set ut = null
