@@ -29,6 +29,23 @@ globals
     string array killTaskHint
     rect array killHintRect // 提示要杀的怪物的位置
 
+    // 收集类任务
+    constant integer COLLECT_TASK_OFFSET = $F200000
+    integer collectTaskId = 0
+    integer array collectTaskItemId
+    integer array collectTaskTargetItemId
+    boolean array collectTaskRepeatable
+    string array collectTaskHint
+    rect array collectNpcRect
+
+    // 拜访类任务
+    constant integer VISIT_TASK_OFFSET = $F300000
+    integer visitTaskId = 0
+    integer array visitTaskItemId
+    rect array visitTargetNpcRect
+    boolean array visitTaskRepeatable
+    string array visitTaskHint
+
 
     // 常量
     constant integer STATUS_INIT = 0
