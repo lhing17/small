@@ -99,6 +99,8 @@ function mapInit takes nothing returns nothing
 	call initHeroSelection() // 初始化英雄选择系统
 	call initDenomSelection() // 初始化门派选择
 
+	call initTasks() // 初始化任务
+
 	call najitest() // 纳吉的测试代码
 	call keyInputSystem() // 初始化键盘输入系统
 	call everySecond() // 每秒钟调用一次

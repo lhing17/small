@@ -42,6 +42,9 @@ function PickupItem_Conditions takes nothing returns boolean
 
 	// 接受护送类任务
 	call acceptProtectTask(u, it)
+
+	// 接受杀怪类任务
+	call acceptKillTask(u, it)
 	
 	set u = null
 	set it = null
