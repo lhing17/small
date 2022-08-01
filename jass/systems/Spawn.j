@@ -82,21 +82,21 @@ function InitSpawn takes nothing returns nothing
 
 
     // 暂定15波进攻怪
-    set attackers[1] = 'e000'
-    set attackers[2] = 'e001'
-    set attackers[3] = 'e002'
-    set attackers[4] = 'e003'
-    set attackers[5] = 'e004'
-    set attackers[6] = 'e005'
-    set attackers[7] = 'e006'
-    set attackers[8] = 'e007'
-    set attackers[9] = 'e008'
-    set attackers[10] = 'e009'
-    set attackers[11] = 'e010'
-    set attackers[12] = 'e011'
-    set attackers[13] = 'e012'
-    set attackers[14] = 'e013'
-    set attackers[15] = 'e014'
+    set attackers[1] = 'h000'
+    set attackers[2] = 'h001'
+    set attackers[3] = 'h002'
+    set attackers[4] = 'h003'
+    set attackers[5] = 'h004'
+    set attackers[6] = 'h005'
+    set attackers[7] = 'h006'
+    set attackers[8] = 'h007'
+    set attackers[9] = 'h008'
+    set attackers[10] = 'h009'
+    set attackers[11] = 'h00A'
+    set attackers[12] = 'h00B'
+    set attackers[13] = 'h00C'
+    set attackers[14] = 'h00D'
+    set attackers[15] = 'h00E'
 
     // 初始化出怪点
     set spawnFront1Point[1] = 0.0
