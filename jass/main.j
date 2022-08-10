@@ -23,6 +23,9 @@
 // 副本
 #include "logic/Instance.j"
 
+// 伤害公式
+#include "logic/Damage.j"
+
 // 通用系统
 #include "systems/GeneralDebuff.j"
 
@@ -49,6 +52,16 @@ globals
 	integer array medical
 	// 声望，用于历练和兑换物品
 	integer array reputation
+	// 英雄命中率，用于计算攻击是否命中
+	integer array hitRate
+	// 额外伤害（ED），来自于武器的伤害加成
+	real array weaponExtraDamage
+	// 额外伤害（ED），来自于非武器的伤害加成
+	real array extraDamage
+	// 暴击率，用于计算暴击伤害
+	real array critRate
+	// 暴击倍数，用于计算暴击伤害
+	real array critMultiple
 
 	constant integer LING_BO_WEI_BU = 'A000'
 
@@ -58,9 +71,9 @@ globals
 	boolean array isTestPlayer
 
 	// 声音
-	sound hintSound = null
-	sound warningSound = null
-	sound questCompletedSound = null
+	sound hintSound = null // 任务提示
+	sound warningSound = null // 失败警告
+	sound questCompletedSound = null // 任务完成提示
 endglobals
 
 
@@ -74,6 +87,11 @@ function initSelfDefinedGlobals takes nothing returns nothing
 		set medical[i] = 0
 		set isTestPlayer[i] = false
 		set reputation[i] = 0
+		set hitRate[i] = 100
+		set weaponExtraDamage[i] = 0
+		set extraDamage[i] = 0
+		set critRate[i] = 0.05
+		set critMultiple[i] = 2
 		set i = i + 1
 	endloop
 
