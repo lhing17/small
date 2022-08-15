@@ -13,19 +13,6 @@ function UnitDamage_Conditions takes nothing returns boolean
 	local integer j = 1
 	local effect eff = null
 
-	if IsUnitAlly(u, Player(0)) and showDamage[i] then
-		// 显示伤害
-		set damageStr = I2S(R2I(damage) + 1)
-		loop
-			exitwhen j > StringLength(damageStr)
-			set eff = AddSpecialEffect("war3mapImported\\tips_" + SubString(damageStr, j, j) + ".mdx", GetUnitX(u) + 32 * (j - 1), GetUnitY(u))
-			call EXSetEffectSize(eff, 1.38)
-			call EXSetEffectZ(eff, 80)
-			call DestroyEffect(eff)
-			set j = j + 1
-		endloop
-	endif
-
 	set eff = null
 	set u = null
 	set ut = null
