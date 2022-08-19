@@ -177,6 +177,16 @@ integer array luck
 integer array medical
 	// 声望，用于历练和兑换物品
 integer array reputation
+	// 英雄命中率，用于计算攻击是否命中
+integer array hitRate
+	// 额外伤害（ED），来自于武器的伤害加成
+real array weaponExtraDamage
+	// 额外伤害（ED），来自于非武器的伤害加成
+real array extraDamage
+	// 暴击率，用于计算暴击伤害
+real array critRate
+	// 暴击倍数，用于计算暴击伤害
+real array critMultiple
 constant integer LING_BO_WEI_BU= 'A000'
 	// 是否测试版本
 constant boolean TEST_VERSION= false
@@ -254,6 +264,8 @@ native DzSetMemory takes integer address, real value returns nothing
 native DzSetUnitID takes unit whichUnit, integer id returns nothing
 native DzSetUnitModel takes unit whichUnit, string path returns nothing
 native DzSetWar3MapMap takes string map returns nothing
+native DzGetLocale takes nothing returns string
+native DzGetUnitNeededXP takes unit whichUnit, integer level returns integer
 native DzTriggerRegisterSyncData takes trigger trig, string prefix, boolean server returns nothing
 native DzSyncData takes string prefix, string data returns nothing
 native DzGetTriggerSyncData takes nothing returns string
@@ -269,10 +281,10 @@ native DzFrameGetHeroManaBar takes integer buttonId returns integer
 native DzFrameGetItemBarButton takes integer buttonId returns integer
 native DzFrameGetMinimapButton takes integer buttonId returns integer
 native DzFrameGetUpperButtonBarButton takes integer buttonId returns integer
-native DzFrameGetTooltip takes nothing returns integer 
-native DzFrameGetChatMessage takes nothing returns integer 
-native DzFrameGetUnitMessage takes nothing returns integer 
-native DzFrameGetTopMessage takes nothing returns integer 
+native DzFrameGetTooltip takes nothing returns integer
+native DzFrameGetChatMessage takes nothing returns integer
+native DzFrameGetUnitMessage takes nothing returns integer
+native DzFrameGetTopMessage takes nothing returns integer
 native DzGetColor takes integer r, integer g, integer b, integer a returns integer
 native DzFrameSetUpdateCallback takes string func returns nothing
 native DzFrameSetUpdateCallbackByCode takes code funcHandle returns nothing
@@ -322,19 +334,14 @@ native DzFrameSetValue takes integer frame, real value returns nothing
 native DzFrameSetSize takes integer frame, real w, real h returns nothing
 native DzCreateFrameByTagName takes string frameType, string name, integer parent, string template, integer id returns integer
 native DzFrameSetVertexColor takes integer frame, integer color returns nothing
-native EXGetUnitAbility takes unit u, integer abilcode returns ability
-native EXGetUnitAbilityByIndex takes unit u, integer index returns ability
-native EXGetAbilityId takes ability abil returns integer
-native EXGetAbilityState takes ability abil, integer state_type returns real
-native EXSetAbilityState takes ability abil, integer state_type, real value returns boolean
-native EXGetAbilityDataReal takes ability abil, integer level, integer data_type returns real
-native EXSetAbilityDataReal takes ability abil, integer level, integer data_type, real value returns boolean
-native EXGetAbilityDataInteger takes ability abil, integer level, integer data_type returns integer
-native EXSetAbilityDataInteger takes ability abil, integer level, integer data_type, integer value returns boolean
-native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
-native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
-native EXGetEventDamageData takes integer edd_type returns integer
-native EXSetEventDamage takes real amount returns boolean
+native DzOriginalUIAutoResetPoint takes boolean enable returns nothing
+native DzFrameSetPriority takes integer frame, integer priority returns nothing
+native DzFrameSetParent takes integer frame, integer parent returns nothing
+native DzFrameGetHeight takes integer frame returns real
+native DzFrameSetFont takes integer frame, string fileName, real height, integer flag returns nothing
+native DzFrameGetParent takes integer frame returns integer
+native DzFrameSetTextAlignment takes integer frame, integer align returns nothing
+native DzFrameGetName takes integer frame returns string
 native DzAPI_Map_SaveServerValue takes player whichPlayer, string key, string value returns boolean
 native DzAPI_Map_GetServerValue takes player whichPlayer, string key returns string
 native DzAPI_Map_Ladder_SetStat takes player whichPlayer, string key, string value returns nothing
@@ -357,9 +364,33 @@ native DzAPI_Map_MissionComplete takes player whichPlayer, string key, string va
 native DzAPI_Map_GetActivityData takes nothing returns string
 native DzAPI_Map_GetMapConfig takes string key returns string
 native DzAPI_Map_HasMallItem takes player whichPlayer, string key returns boolean
-native EXSetAbilityAEmeDataA takes ability abil,integer unitid returns boolean
-native EXGetItemDataString takes integer itemcode,integer data_type returns string
-native EXSetItemDataString takes integer itemcode,integer data_type,string value returns boolean
+native DzAPI_Map_SavePublicArchive takes player whichPlayer, string key, string value returns boolean
+native DzAPI_Map_GetPublicArchive takes player whichPlayer, string key returns string
+native DzAPI_Map_UseConsumablesItem takes player whichPlayer, string key returns nothing
+native DzAPI_Map_OrpgTrigger takes player whichPlayer, string key returns nothing
+native DzAPI_Map_GetServerArchiveDrop takes player whichPlayer, string key returns string
+native DzAPI_Map_GetServerArchiveEquip takes player whichPlayer, string key returns integer
+native RequestExtraIntegerData takes integer dataType, player whichPlayer, string param1, string param2, boolean param3, integer param4, integer param5, integer param6 returns integer
+native RequestExtraBooleanData takes integer dataType, player whichPlayer, string param1, string param2, boolean param3, integer param4, integer param5, integer param6 returns boolean
+native RequestExtraStringData takes integer dataType, player whichPlayer, string param1, string param2, boolean param3, integer param4, integer param5, integer param6 returns string
+native RequestExtraRealData takes integer dataType, player whichPlayer, string param1, string param2, boolean param3, integer param4, integer param5, integer param6 returns real
+native DzAPI_Map_GetPlatformVIP takes player whichPlayer returns integer
+native EXGetUnitAbility takes unit u, integer abilcode returns ability
+native EXGetUnitAbilityByIndex takes unit u, integer index returns ability
+native EXGetAbilityId takes ability abil returns integer
+native EXGetAbilityState takes ability abil, integer state_type returns real
+native EXSetAbilityState takes ability abil, integer state_type, real value returns boolean
+native EXGetAbilityDataReal takes ability abil, integer level, integer data_type returns real
+native EXSetAbilityDataReal takes ability abil, integer level, integer data_type, real value returns boolean
+native EXGetAbilityDataInteger takes ability abil, integer level, integer data_type returns integer
+native EXSetAbilityDataInteger takes ability abil, integer level, integer data_type, integer value returns boolean
+native EXGetAbilityDataString takes ability abil, integer level, integer data_type returns string
+native EXSetAbilityDataString takes ability abil, integer level, integer data_type, string value returns boolean
+native EXSetAbilityAEmeDataA takes ability abil, integer unitid returns boolean
+native EXGetItemDataString takes integer itemcode, integer data_type returns string
+native EXSetItemDataString takes integer itemcode, integer data_type, string value returns boolean
+native EXGetEventDamageData takes integer edd_type returns integer
+native EXSetEventDamage takes real amount returns boolean
 native EXExecuteScript takes string script returns string
 
 
@@ -608,7 +639,7 @@ function s__Frame_deallocate takes integer this returns nothing
     set si__Frame_V[this]=si__Frame_F
     set si__Frame_F=this
 endfunction
-    function FrameLibrary__init takes nothing returns nothing
+    function FrameLibrary___init takes nothing returns nothing
         local integer f= DzFrameGetTooltip()
         local real size= 0.75
         set GUI=s__Frame_getFrame(DzGetGameUI())
@@ -978,7 +1009,7 @@ endfunction
 // 
 //   Warcraft III map script
 //   Generated by the Warcraft III World Editor
-//   Date: Tue Aug 09 23:46:39 2022
+//   Date: Fri Aug 19 09:05:16 2022
 //   Map Author: zei_kale
 // 
 //===========================================================================
@@ -1069,6 +1100,8 @@ endfunction
 //设置单位模型
 
 //设置小地图背景图片
+
+
 
 //sync
 //注册数据同步trigger
@@ -1208,7 +1241,65 @@ endfunction
 
 //设置颜色（支持SimpleStatusBar）
 
-// japi
+
+
+
+
+
+
+
+
+function DzTriggerRegisterMouseEventTrg takes trigger trg,integer status,integer btn returns nothing
+    if trg == null then
+        return
+    endif
+    call DzTriggerRegisterMouseEvent(trg, btn, status, true, null)
+endfunction
+function DzTriggerRegisterKeyEventTrg takes trigger trg,integer status,integer btn returns nothing
+    if trg == null then
+        return
+    endif
+    call DzTriggerRegisterKeyEvent(trg, btn, status, true, null)
+endfunction
+function DzTriggerRegisterMouseMoveEventTrg takes trigger trg returns nothing
+    if trg == null then
+        return
+    endif
+    call DzTriggerRegisterMouseMoveEvent(trg, true, null)
+endfunction
+function DzTriggerRegisterMouseWheelEventTrg takes trigger trg returns nothing
+    if trg == null then
+        return
+    endif
+    call DzTriggerRegisterMouseWheelEvent(trg, true, null)
+endfunction
+function DzTriggerRegisterWindowResizeEventTrg takes trigger trg returns nothing
+    if trg == null then
+        return
+    endif
+    call DzTriggerRegisterWindowResizeEvent(trg, true, null)
+endfunction
+function DzF2I takes integer i returns integer
+    return i
+endfunction
+function DzI2F takes integer i returns integer
+    return i
+endfunction
+function DzK2I takes integer i returns integer
+    return i
+endfunction
+function DzI2K takes integer i returns integer
+    return i
+endfunction
+function DzTriggerRegisterMallItemSyncData takes trigger trig returns nothing
+    call DzTriggerRegisterSyncData(trig, "DZMIA", true)
+endfunction
+function DzGetTriggerMallItemPlayer takes nothing returns player
+    return DzGetTriggerSyncPlayer()
+endfunction
+function DzGetTriggerMallItem takes nothing returns string
+    return DzGetTriggerSyncData()
+endfunction
 
 
 
@@ -1242,9 +1333,7 @@ endfunction
 
 
 
-
-
-	//library DzAPI ends
+//library DzAPI ends
 // japi
 
 
@@ -1277,12 +1366,59 @@ endfunction
 
 
 //library DzAPI:
+function DzAPI_Map_IsPlatformVIP takes player whichPlayer returns boolean
+	return DzAPI_Map_GetPlatformVIP(whichPlayer) > 0
+endfunction
+function DzAPI_Map_Global_GetStoreString takes string key returns string
+	return RequestExtraStringData(36, GetLocalPlayer(), key, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_Global_StoreString takes string key,string value returns nothing
+	call RequestExtraStringData(37, GetLocalPlayer(), key, value, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_Global_ChangeMsg takes trigger trig returns nothing
+	call DzTriggerRegisterSyncData(trig, "DZGAU", true)
+endfunction
+function DzAPI_Map_ServerArchive takes player whichPlayer,string key returns string
+	return RequestExtraStringData(38, whichPlayer, key, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_SaveServerArchive takes player whichPlayer,string key,string value returns nothing
+	call RequestExtraBooleanData(39, whichPlayer, key, value, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_IsRPGQuickMatch takes nothing returns boolean
+	return RequestExtraBooleanData(40, null, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_GetMallItemCount takes player whichPlayer,string key returns integer
+	return RequestExtraIntegerData(41, whichPlayer, key, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_ConsumeMallItem takes player whichPlayer,string key,integer count returns boolean
+	return RequestExtraBooleanData(42, whichPlayer, key, null, false, count, 0, 0)
+endfunction
+function DzAPI_Map_EnablePlatformSettings takes player whichPlayer,integer option,boolean enable returns boolean
+	return RequestExtraBooleanData(43, whichPlayer, null, null, enable, option, 0, 0)
+endfunction
+function DzAPI_Map_IsBuyReforged takes player whichPlayer returns boolean
+	return RequestExtraBooleanData(44, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
 function GetPlayerServerValueSuccess takes player whichPlayer returns boolean
 	if ( DzAPI_Map_GetServerValueErrorCode(whichPlayer) == 0 ) then
 		return true
 	else
 		return false
 	endif
+endfunction
+function DzAPI_Map_StoreIntegerEX takes player whichPlayer,string key,integer value returns nothing
+	set key="I" + key
+	call RequestExtraBooleanData(39, whichPlayer, key, I2S(value), false, 0, 0, 0)
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredIntegerEX takes player whichPlayer,string key returns integer
+ local integer value
+	set key="I" + key
+	set value=S2I(RequestExtraStringData(38, whichPlayer, key, null, false, 0, 0, 0))
+	set key=null
+	set whichPlayer=null
+	return value
 endfunction
 function DzAPI_Map_StoreInteger takes player whichPlayer,string key,integer value returns nothing
 	set key="I" + key
@@ -1297,6 +1433,9 @@ function DzAPI_Map_GetStoredInteger takes player whichPlayer,string key returns 
 	set key=null
 	set whichPlayer=null
 	return value
+endfunction
+function DzAPI_Map_CommentTotalCount1 takes player whichPlayer,integer id returns integer
+	return RequestExtraIntegerData(52, whichPlayer, null, null, false, id, 0, 0)
 endfunction
 function DzAPI_Map_StoreReal takes player whichPlayer,string key,real value returns nothing
 	set key="R" + key
@@ -1344,6 +1483,15 @@ endfunction
 function DzAPI_Map_GetStoredString takes player whichPlayer,string key returns string
 	return DzAPI_Map_GetServerValue(whichPlayer, "S" + key)
 endfunction
+function DzAPI_Map_StoreStringEX takes player whichPlayer,string key,string value returns nothing
+	set key="S" + key
+	call RequestExtraBooleanData(39, whichPlayer, key, value, false, 0, 0, 0)
+	set key=null
+	set whichPlayer=null
+endfunction
+function DzAPI_Map_GetStoredStringEX takes player whichPlayer,string key returns string
+	return RequestExtraStringData(38, whichPlayer, "S" + key, null, false, 0, 0, 0)
+endfunction
 function DzAPI_Map_GetStoredUnitType takes player whichPlayer,string key returns integer
  local integer value
 	set key="I" + key
@@ -1386,15 +1534,15 @@ function DzAPI_Map_Ladder_SubmitAblityIdData takes player whichPlayer,string key
 	endif
 endfunction
 function DzAPI_Map_Ladder_SubmitItemIdData takes player whichPlayer,string key,integer value returns nothing
- local string l__S
+ local string S
 	if ( value == 0 ) then
-		set l__S="0"
+		set S="0"
 	else
-		set l__S=I2S(value)
-		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, l__S)
+		set S=I2S(value)
+		call DzAPI_Map_Ladder_SetStat(whichPlayer, key, S)
 	endif
 	//call DzAPI_Map_Ladder_SetStat(whichPlayer,key,S)
-	set l__S=null
+	set S=null
 	set whichPlayer=null
 endfunction
 function DzAPI_Map_Ladder_SubmitItemData takes player whichPlayer,string key,item value returns nothing
@@ -1415,6 +1563,79 @@ function DzAPI_Map_Ladder_SubmitPlayerRank takes player whichPlayer,integer valu
 endfunction
 function DzAPI_Map_Ladder_SubmitPlayerExtraExp takes player whichPlayer,integer value returns nothing
 	call DzAPI_Map_Ladder_SetStat(whichPlayer, "ExtraExp", I2S(value))
+endfunction
+function DzAPI_Map_PlayedGames takes player whichPlayer returns integer
+	return RequestExtraIntegerData(45, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_CommentCount takes player whichPlayer returns integer
+	return RequestExtraIntegerData(46, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_FriendCount takes player whichPlayer returns integer
+	return RequestExtraIntegerData(47, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_IsConnoisseur takes player whichPlayer returns boolean
+	return RequestExtraBooleanData(48, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_IsBattleNetAccount takes player whichPlayer returns boolean
+	return RequestExtraBooleanData(49, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_IsAuthor takes player whichPlayer returns boolean
+	return RequestExtraBooleanData(50, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_CommentTotalCount takes nothing returns integer
+	return RequestExtraIntegerData(51, null, null, null, false, 0, 0, 0)
+endfunction
+function DzAPI_Map_Statistics takes player whichPlayer,string eventKey,string eventType,integer value returns nothing
+	call RequestExtraBooleanData(34, whichPlayer, eventKey, "", false, value, 0, 0)
+endfunction
+function DzAPI_Map_Returns takes player whichPlayer,integer label returns boolean
+	return RequestExtraBooleanData(53, whichPlayer, null, null, false, label, 0, 0)
+endfunction
+function DzAPI_Map_ContinuousCount takes player whichPlayer,integer id returns integer
+	return RequestExtraIntegerData(54, whichPlayer, null, null, false, id, 0, 0)
+endfunction
+// IsPlayer,                      //是否为玩家
+function DzAPI_Map_IsPlayer takes player whichPlayer returns boolean
+	return RequestExtraBooleanData(55, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+// MapsTotalPlayed,               //所有地图的总游戏时长
+function DzAPI_Map_MapsTotalPlayed takes player whichPlayer returns integer
+	return RequestExtraIntegerData(56, whichPlayer, null, null, false, 0, 0, 0)
+endfunction
+// MapsLevel,                    //指定地图的地图等级
+function DzAPI_Map_MapsLevel takes player whichPlayer,integer mapId returns integer
+	return RequestExtraIntegerData(57, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeGold,              //所有地图的金币消耗
+function DzAPI_Map_MapsConsumeGold takes player whichPlayer,integer mapId returns integer
+	return RequestExtraIntegerData(58, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeLumber,            //所有地图的木材消耗
+function DzAPI_Map_MapsConsumeLumber takes player whichPlayer,integer mapId returns integer
+	return RequestExtraIntegerData(59, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeLv1,               //消费 1-199
+function DzAPI_Map_MapsConsumeLv1 takes player whichPlayer,integer mapId returns boolean
+	return RequestExtraBooleanData(60, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeLv2,               //消费 200-499
+function DzAPI_Map_MapsConsumeLv2 takes player whichPlayer,integer mapId returns boolean
+	return RequestExtraBooleanData(61, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeLv3,               //消费 500~999
+function DzAPI_Map_MapsConsumeLv3 takes player whichPlayer,integer mapId returns boolean
+	return RequestExtraBooleanData(62, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+// MapsConsumeLv4,               //消费 1000+
+function DzAPI_Map_MapsConsumeLv4 takes player whichPlayer,integer mapId returns boolean
+	return RequestExtraBooleanData(63, whichPlayer, null, null, false, mapId, 0, 0)
+endfunction
+//获取论坛数据（0=累计获得赞数，1=精华帖数量，2=发表回复次数，3=收到的欢乐数，4=是否发过贴子，5=是否版主，6=主题数量）
+function DzAPI_Map_GetForumData takes player whichPlayer,integer whichData returns integer
+	return RequestExtraIntegerData(65, whichPlayer, null, null, false, whichData, 0, 0)
+endfunction
+function DzAPI_Map_OpenMall takes player whichPlayer,string whichkey returns boolean
+	return RequestExtraBooleanData(66, whichPlayer, whichkey, null, false, 0, 0, 0)
 endfunction
 // 刷怪
 
@@ -1887,6 +2108,90 @@ endfunction
 // 历练系统
 // 副本
 // 副本系统
+// 伤害公式
+// 命中公式 实际命中率=自己命中率/（自己命中率+别人闪避率）*[自己等级*2/（自己等级+对方等级）]
+function hitFormula takes unit source,unit target returns real
+    local integer sourceLevel= GetUnitLevel(source)
+    local integer targetLevel= GetUnitLevel(target)
+    // 敌人闪避暂时设定为等于等级
+    local integer targetEvasion= targetLevel
+    local integer i= 1 + GetPlayerId(GetOwningPlayer(source))
+    local real hit= 0
+    if i <= 5 then
+        set hit=1.0 * hitRate[i] / ( hitRate[i] + targetEvasion ) * sourceLevel * 2 / ( sourceLevel + targetLevel )
+    else
+        // 敌方的命中是等级的5倍
+        set hit=1.0 * sourceLevel * 5 / ( sourceLevel * 5 + targetEvasion ) * sourceLevel * 2 / ( sourceLevel + targetLevel )
+    endif
+    // 命中率在0.1到0.95之间
+    if hit < 0.1 then
+        set hit=0.1
+    elseif hit > 0.95 then
+        set hit=0.95
+    endif
+    return hit
+endfunction
+function showDamageWithEffects takes integer i,unit u,real damage,boolean critical returns nothing
+ local integer criticalInt= 2
+ local location loc= GetUnitLoc(u)
+ local string damageStr= ""
+ local integer j= 1
+ local effect eff= null
+	if critical then
+		set criticalInt=1
+	endif
+	if IsUnitEnemy(u, Player(0)) then
+		if Player(i - 1) == GetLocalPlayer() and showDamage[i] then
+			// 显示伤害
+			set damageStr=I2S(R2I(damage) + 1)
+			loop
+				exitwhen j > StringLength(damageStr)
+				set eff=AddSpecialEffect("war3mapImported\\SHZT1" + I2S(criticalInt) + "-" + SubStringBJ(damageStr, j, j) + ".mdx", GetUnitX(u) + 32 / 1.38 * ( j - 1 ), GetUnitY(u))
+				call EXSetEffectZ(eff, GetLocationZ(loc) + 80)
+				call DestroyEffect(eff)
+				set j=j + 1
+			endloop
+			if critical then
+				set eff=AddSpecialEffect("war3mapImported\\SHZT11-10.mdx", GetUnitX(u) - 37 / 1.38, GetUnitY(u))
+				call EXSetEffectZ(eff, GetLocationZ(loc) + 80)
+				call DestroyEffect(eff)
+			endif
+		endif
+	endif
+	call RemoveLocation(loc)
+	set loc=null
+	set eff=null
+endfunction
+// 伤害公式 
+// 基本伤害= 100
+// 伤害 = （基本伤害 * (1+武器ed数值/100) + 直接最小/最大伤害增加值）  *  （1 + 0.01 * 招式 + 非武器ed/100) * (1 + 0.01 * 内力 + 技能系数/100) * {暴击倍数} + {元素伤害}
+function damageFormula takes unit source,real coefficient,integer skillId returns real
+    local real damage= 0
+    local real baseDamage= 100
+    local integer i= 1 + GetPlayerId(GetOwningPlayer(source))
+    set damage=baseDamage * ( 1 + weaponExtraDamage[i] / 100 ) * ( 1 + 0.01 * GetHeroStr(source, true) + extraDamage[i] / 100 ) * ( 1 + 0.01 * GetHeroInt(source, true) + coefficient * GetUnitAbilityLevel(source, skillId) / 100 )
+    return damage
+endfunction
+function dealDamage takes unit source,unit target,real damage returns nothing
+    local integer i= 1 + GetPlayerId(GetOwningPlayer(source))
+    local boolean critical= false
+    // 触发暴击
+    if GetRandomReal(0, 1) < critRate[i] then
+        set damage=damage * critMultiple[i]
+        set critical=true
+    endif
+    // 触发闪避
+    if GetRandomReal(0, 1) > hitFormula(source , target) then
+        set damage=0
+    endif
+    // 触发格档？
+    // 实际伤害
+    if damage > 0 then
+        call UnitDamageTarget(source, target, damage, true, false, ATTACK_TYPE_MAGIC, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+        call showDamageWithEffects(i , target , damage , critical)
+    endif
+endfunction
+    
 // 通用系统
 
 function doApplyGeneralDebuff takes integer buffnum,integer num,unit uc,integer id,integer buffId,integer orderid,unit ut,string s returns nothing
@@ -4742,18 +5047,6 @@ function UnitDamage_Conditions takes nothing returns boolean
  local string damageStr= ""
  local integer j= 1
  local effect eff= null
-	if IsUnitAlly(u, Player(0)) and showDamage[i] then
-		// 显示伤害
-		set damageStr=I2S(R2I(damage) + 1)
-		loop
-			exitwhen j > StringLength(damageStr)
-			set eff=AddSpecialEffect("war3mapImported\\tips_" + SubString(damageStr, j, j) + ".mdx", GetUnitX(u) + 32 * ( j - 1 ), GetUnitY(u))
-			call EXSetEffectSize(eff, 1.38)
-			call EXSetEffectZ(eff, 80)
-			call DestroyEffect(eff)
-			set j=j + 1
-		endloop
-	endif
 	set eff=null
 	set u=null
 	set ut=null
@@ -4888,6 +5181,11 @@ function initSelfDefinedGlobals takes nothing returns nothing
 		set medical[i]=0
 		set isTestPlayer[i]=false
 		set reputation[i]=0
+		set hitRate[i]=100
+		set weaponExtraDamage[i]=0
+		set extraDamage[i]=0
+		set critRate[i]=0.05
+		set critMultiple[i]=2
 		set i=i + 1
 	endloop
 	// 初始化声音
@@ -5139,8 +5437,8 @@ function main takes nothing returns nothing
     call SetMapMusic("Music", true, 0)
     call InitBlizzard()
 
-call ExecuteFunc("jasshelper__initstructs20332281")
-call ExecuteFunc("FrameLibrary__init")
+call ExecuteFunc("jasshelper__initstructs348321218")
+call ExecuteFunc("FrameLibrary___init")
 call ExecuteFunc("YDTriggerSaveLoadSystem___Init")
 call ExecuteFunc("YDWETimerSystem___Init")
 
@@ -5171,14 +5469,14 @@ function config takes nothing returns nothing
     call InitCustomTeams()
     call InitAllyPriorities()
 endfunction
-//===========================================================================
-//ϵͳ-TimerSystem
-//===========================================================================
 //===========================================================================  
 //===========================================================================  
 //�Զ����¼� 
 //===========================================================================
 //===========================================================================   
+//===========================================================================
+//ϵͳ-TimerSystem
+//===========================================================================
 
 
 
@@ -5193,7 +5491,7 @@ local integer this=f__arg_this
    return true
 endfunction
 
-function jasshelper__initstructs20332281 takes nothing returns nothing
+function jasshelper__initstructs348321218 takes nothing returns nothing
     set st__Frame_onDestroy=CreateTrigger()
     call TriggerAddCondition(st__Frame_onDestroy,Condition( function sa__Frame_onDestroy))
 
