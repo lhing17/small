@@ -360,66 +360,66 @@ native DzFrameGetParent takes integer frame returns integer
 native DzFrameSetTextAlignment takes integer frame, integer align returns nothing
 native DzFrameGetName takes integer frame returns string
 
-function DzTriggerRegisterMouseEventTrg takes trigger trg, integer status, integer btn returns nothing
-    if trg == null then
-        return
-    endif
-    call DzTriggerRegisterMouseEvent(trg, btn, status, true, null)
-endfunction
+// function DzTriggerRegisterMouseEventTrg takes trigger trg, integer status, integer btn returns nothing
+//     if trg == null then
+//         return
+//     endif
+//     call DzTriggerRegisterMouseEvent(trg, btn, status, true, null)
+// endfunction
 
-function DzTriggerRegisterKeyEventTrg takes trigger trg, integer status, integer btn returns nothing
-    if trg == null then
-        return
-    endif
-    call DzTriggerRegisterKeyEvent(trg, btn, status, true, null)
-endfunction
+// function DzTriggerRegisterKeyEventTrg takes trigger trg, integer status, integer btn returns nothing
+//     if trg == null then
+//         return
+//     endif
+//     call DzTriggerRegisterKeyEvent(trg, btn, status, true, null)
+// endfunction
 
-function DzTriggerRegisterMouseMoveEventTrg takes trigger trg returns nothing
-    if trg == null then
-        return
-    endif
-    call DzTriggerRegisterMouseMoveEvent(trg, true, null)
-endfunction
+// function DzTriggerRegisterMouseMoveEventTrg takes trigger trg returns nothing
+//     if trg == null then
+//         return
+//     endif
+//     call DzTriggerRegisterMouseMoveEvent(trg, true, null)
+// endfunction
 
-function DzTriggerRegisterMouseWheelEventTrg takes trigger trg returns nothing
-    if trg == null then
-        return
-    endif
-    call DzTriggerRegisterMouseWheelEvent(trg, true, null)
-endfunction
+// function DzTriggerRegisterMouseWheelEventTrg takes trigger trg returns nothing
+//     if trg == null then
+//         return
+//     endif
+//     call DzTriggerRegisterMouseWheelEvent(trg, true, null)
+// endfunction
 
-function DzTriggerRegisterWindowResizeEventTrg takes trigger trg returns nothing
-    if trg == null then
-        return
-    endif
-    call DzTriggerRegisterWindowResizeEvent(trg, true, null)
-endfunction
+// function DzTriggerRegisterWindowResizeEventTrg takes trigger trg returns nothing
+//     if trg == null then
+//         return
+//     endif
+//     call DzTriggerRegisterWindowResizeEvent(trg, true, null)
+// endfunction
 
-function DzF2I takes integer i returns integer
-    return i
-endfunction
+// function DzF2I takes integer i returns integer
+//     return i
+// endfunction
 
-function DzI2F takes integer i returns integer
-    return i
-endfunction
+// function DzI2F takes integer i returns integer
+//     return i
+// endfunction
 
-function DzK2I takes integer i returns integer
-    return i
-endfunction
+// function DzK2I takes integer i returns integer
+//     return i
+// endfunction
 
-function DzI2K takes integer i returns integer
-    return i
-endfunction
+// function DzI2K takes integer i returns integer
+//     return i
+// endfunction
 
-function DzTriggerRegisterMallItemSyncData takes trigger trig returns nothing
-    call DzTriggerRegisterSyncData(trig, "DZMIA", true)
-endfunction
+// function DzTriggerRegisterMallItemSyncData takes trigger trig returns nothing
+//     call DzTriggerRegisterSyncData(trig, "DZMIA", true)
+// endfunction
 
-function DzGetTriggerMallItemPlayer takes nothing returns player
-    return DzGetTriggerSyncPlayer()
-endfunction
+// function DzGetTriggerMallItemPlayer takes nothing returns player
+//     return DzGetTriggerSyncPlayer()
+// endfunction
 
-function DzGetTriggerMallItem takes nothing returns string
-    return DzGetTriggerSyncData()
-endfunction
+// function DzGetTriggerMallItem takes nothing returns string
+//     return DzGetTriggerSyncData()
+// endfunction
 

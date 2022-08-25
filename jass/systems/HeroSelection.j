@@ -10,7 +10,7 @@ endglobals
 
 
 function canSelectHero takes nothing returns boolean
-    return IsUnitInGroup(GetTriggerUnit(), heroGroup) and hasHero[1 + GetPlayerId(GetTriggerPlayer())]
+    return IsUnitInGroup(GetTriggerUnit(), heroGroup) and not hasHero[1 + GetPlayerId(GetTriggerPlayer())]
 endfunction
 
 // 播放攻击动画
@@ -58,13 +58,13 @@ endfunction
 function initHeroSelection takes nothing returns nothing
     local trigger t = CreateTrigger()
     local integer j = 1
-    set heroList[1] = null // gg_unit_hero_1
-    set heroList[2] = null // gg_unit_hero_2
-    set heroList[3] = null // gg_unit_hero_3
-    set heroList[4] = null // gg_unit_hero_4
-    set heroList[5] = null // gg_unit_hero_5
-    set heroList[6] = null // gg_unit_hero_6
-    set heroList[7] = null // gg_unit_hero_7
+    set heroList[1] = gg_unit_O105_0333
+    set heroList[2] = gg_unit_O104_0334
+    set heroList[3] = gg_unit_O100_0335
+    set heroList[4] = gg_unit_O103_0336
+    set heroList[5] = gg_unit_O102_0337
+    set heroList[6] = gg_unit_O101_0338
+    set heroList[7] = gg_unit_O106_0339
 
     set heroDescription[1] = "英雄1描述"
     set heroDescription[2] = "英雄2描述"
@@ -74,8 +74,8 @@ function initHeroSelection takes nothing returns nothing
     set heroDescription[6] = "英雄6描述"
     set heroDescription[7] = "英雄7描述"
 
-    set heroBornPoint[1] = 0.0
-    set heroBornPoint[2] = 0.0
+    set heroBornPoint[1] = 5348
+    set heroBornPoint[2] = -468
 
     set j = 1
     loop
@@ -86,6 +86,7 @@ function initHeroSelection takes nothing returns nothing
         set j = j + 1
     endloop
 
+    set j = 1
     set heroGroup = CreateGroup()
     loop
         exitwhen j > 7
