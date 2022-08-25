@@ -16,6 +16,8 @@ globals
     integer array denomSecond // 门派二技能
     integer array denomThird // 门派三技能
     integer array denomFourth // 门派四技能
+
+    real array newbeeVillagePoint // 新手村的坐标(选择门派后传送至新手村)
 endglobals
 
 function isJoinDenom takes unit u, item it returns boolean
@@ -42,6 +44,11 @@ function joinDenom takes unit u, item it returns nothing
 			call SetPlayerName(p, "〓" + denomName[j] + "〓" + LoadStr(YDHT, GetHandleId(p), GetHandleId(p)))
 			call DisplayTimedTextToPlayer(p, 0, 0, 15., "|CFFff9933获得武功：凌波微步（可以在主城和传送石之间任意传送了）\n获得新手大礼包（可以在背包中打开获得惊喜哦）")
 			call UnitAddAbility(u, LING_BO_WEI_BU)
+
+            // 传送至新手村
+            call SetUnitPosition(hero[i], newbeeVillagePoint[1], newbeeVillagePoint[2])
+            call PanCameraToTimedForPlayer(p, newbeeVillagePoint[1], newbeeVillagePoint[2], 0)
+
 			// call AddCharacterABuff(udg_hero[i], udg_xinggeA[i])
 			// call AddCharacterBBuff(udg_hero[i], udg_xinggeB[i])
 			// if udg_vip[i] < 2 and udg_elevenvip[i] < 1 then
@@ -69,6 +76,9 @@ endfunction
 function initDenomSelection takes nothing returns nothing
 
     local integer j = 1
+
+    set newbeeVillagePoint[1] = 5348
+    set newbeeVillagePoint[2] = -468
 
     set denomListItem[1] = KUI_HUA_ITEM
     set denomListItem[2] = JU_JING_ITEM

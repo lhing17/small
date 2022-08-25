@@ -74,8 +74,8 @@ function initHeroSelection takes nothing returns nothing
     set heroDescription[6] = "英雄6描述"
     set heroDescription[7] = "英雄7描述"
 
-    set heroBornPoint[1] = 5348
-    set heroBornPoint[2] = -468
+    set heroBornPoint[1] = 7800
+    set heroBornPoint[2] = 7000
 
     set j = 1
     loop
